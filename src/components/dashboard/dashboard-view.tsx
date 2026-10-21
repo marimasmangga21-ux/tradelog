@@ -19,6 +19,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { MarketHoursCard } from "@/components/dashboard/market-hours-card";
+import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 import type { Account, Emotion, Journal, Strategy, Trade } from "@/lib/types";
 
 type PeriodKey = "week" | "month" | "3months" | "6months" | "all";
@@ -115,6 +116,16 @@ export function DashboardView({
 
   return (
     <div className="w-full">
+      {/* Onboarding Stepper Guide */}
+      {(trades.length === 0 || accounts.length === 0 || isSample) && (
+        <OnboardingGuide
+          hasAccounts={accounts.length > 0}
+          hasStrategies={strategies.length > 0}
+          hasTrades={trades.length > 0}
+          hasJournals={Boolean(journals && journals.length > 0)}
+        />
+      )}
+
       {/* ============================================================ */}
       {/* MOBILE UI VIEW (PRESISI GAMBAR 4 DARI DOKUMENTASI)           */}
       {/* Ditampilkan di layar ponsel atau iPhone simulator            */}

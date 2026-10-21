@@ -13,6 +13,18 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62Z" />
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z" />
+      <path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z" />
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z" />
+    </svg>
+  );
+}
 
 export function LoginView() {
   const searchParams = useSearchParams();
@@ -49,7 +61,7 @@ export function LoginView() {
         return;
       }
 
-      // Validasi ketat kredensial login / signup
+      // Validasi kredensial login / signup
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,6 +93,37 @@ export function LoginView() {
     } catch (error: any) {
       setMessage(error.message || "Autentikasi gagal. Coba lagi.");
     } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setBusy(true);
+    setMessage("");
+    setNotice("");
+
+    try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://tradelogjournal-app.vercel.app";
+      // Popup akun Google resmi via Supabase dengan query prompt select_account (seperti di Calculator)
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/callback`,
+          queryParams: {
+            prompt: "select_account",
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      setMessage(err?.message || "Gagal membuka autentikasi Google.");
       setBusy(false);
     }
   };
@@ -227,6 +270,23 @@ export function LoginView() {
           </button>
         </form>
 
+        {mode !== "reset" && (
+          <>
+            <div className="auth-divider" role="separator" aria-hidden="true">
+              <span>atau</span>
+            </div>
+            <button
+              type="button"
+              className="auth-google"
+              onClick={handleGoogleLogin}
+              disabled={busy}
+            >
+              <GoogleIcon />
+              <span>Lanjutkan dengan Google</span>
+            </button>
+          </>
+        )}
+
         {/* Switch / Reset links */}
         <div className="auth-switch">
           {mode === "login" ? (
@@ -269,7 +329,7 @@ export function LoginView() {
         </div>
 
         <p className="auth-security-note">
-          Data akun dan jurnal trading disimpan secara privat dan terenkripsi.
+          Data akun dan jurnal trading disimpan secara privat dan terenkripsi per akun.
         </p>
       </section>
     </main>

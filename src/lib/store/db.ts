@@ -17,9 +17,7 @@ export interface RegisteredUser {
   created_at: string;
 }
 
-export interface Database {
-  version: number;
-  /** true bila isinya masih data contoh bawaan (belum pernah diubah user). */
+export interface UserDataset {
   is_sample: boolean;
   profile: Profile;
   accounts: Account[];
@@ -28,36 +26,57 @@ export interface Database {
   journals: Journal[];
   emotions: Emotion[];
   screenshots: TradeScreenshot[];
-  users: RegisteredUser[];
 }
 
-// Di serverless environment (Vercel/Netlify), process.cwd()/data read-only.
-// Gunakan os.tmpdir() atau fallback aman agar tidak crash.
+export interface Database {
+  version: number;
+  users: RegisteredUser[];
+  user_datasets: Record<string, UserDataset>;
+  // Root fallback properties
+  is_sample: boolean;
+  profile: Profile;
+  accounts: Account[];
+  strategies: Strategy[];
+  trades: Trade[];
+  journals: Journal[];
+  emotions: Emotion[];
+  screenshots: TradeScreenshot[];
+}
+
 const IS_SERVERLESS = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
 export const DATA_DIR = IS_SERVERLESS ? path.join(os.tmpdir(), "tradelog-data") : path.join(process.cwd(), "data");
 export const DB_FILE = path.join(DATA_DIR, "tradelog.json");
 export const SCREENSHOT_DIR = path.join(DATA_DIR, "screenshots");
-/** Gambar lain (mis. contoh chart strategi). */
 export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 
-// Cache in-memory untuk runtime serverless
 let memoryDb: Database | null = null;
 
-/** Seed awal: dataset demo dipakai sebagai contoh supaya UI tidak kosong. */
 function seed(): Database {
-  return {
-    version: 1,
+  const ownerDataset: UserDataset = {
     is_sample: true,
     profile: {
       ...demoProfile,
-      email: null,
-      avatar_url: null,
+      name: "Evan Mita",
+      email: "marimasmangga21@gmail.com",
+      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
     },
     accounts: demoAccounts.map((a) => ({ ...a })),
     strategies: demoStrategies.map((s) => ({ ...s })),
     trades: demoTrades.map((t) => ({ ...t })),
     journals: demoJournals.map((j) => ({ ...j })),
     emotions: demoEmotions.map((e) => ({ ...e })),
+    screenshots: [],
+  };
+
+  return {
+    version: 1,
+    is_sample: true,
+    profile: ownerDataset.profile,
+    accounts: ownerDataset.accounts,
+    strategies: ownerDataset.strategies,
+    trades: ownerDataset.trades,
+    journals: ownerDataset.journals,
+    emotions: ownerDataset.emotions,
     screenshots: [],
     users: [
       {
@@ -69,18 +88,16 @@ function seed(): Database {
         created_at: new Date().toISOString(),
       },
     ],
+    user_datasets: {
+      "marimasmangga21@gmail.com": ownerDataset,
+    },
   };
 }
 
-/**
- * Serialisasi akses tulis. Next.js dev bisa menjalankan beberapa request
- * bersamaan; tanpa antrean, dua penulisan bisa saling menimpa.
- */
 let writeChain: Promise<unknown> = Promise.resolve();
 
 function withLock<T>(fn: () => Promise<T>): Promise<T> {
   const run = writeChain.then(fn, fn);
-  // Jangan biarkan rejection memutus rantai untuk request berikutnya.
   writeChain = run.then(
     () => undefined,
     () => undefined,
@@ -92,7 +109,6 @@ async function ensureDirs() {
   await fs.mkdir(DATA_DIR, { recursive: true });
 }
 
-/** Tulis atomik: tulis ke file sementara lalu rename. */
 async function persist(db: Database): Promise<void> {
   memoryDb = db;
   try {
@@ -101,7 +117,6 @@ async function persist(db: Database): Promise<void> {
     await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
     await fs.rename(tmp, DB_FILE);
   } catch (err) {
-    // Pada runtime serverless jika filesystem gagal, fallback ke in-memory
     console.warn("Filesystem write warning:", err);
   }
 }
@@ -110,8 +125,11 @@ function normalize(raw: unknown): Database {
   const base = seed();
   if (!raw || typeof raw !== "object") return base;
   const obj = raw as Partial<Database>;
-  const hasOldAiSlop = Array.isArray(obj.journals) && obj.journals.some((j: any) => typeof j?.lesson_learned === "string" && j.lesson_learned.includes("Menunggu sweep"));
-  const shouldRefreshJournals = obj.is_sample || hasOldAiSlop;
+
+  const userDatasets = obj.user_datasets && typeof obj.user_datasets === "object" ? obj.user_datasets : {};
+  if (!userDatasets["marimasmangga21@gmail.com"]) {
+    userDatasets["marimasmangga21@gmail.com"] = base.user_datasets["marimasmangga21@gmail.com"];
+  }
 
   return {
     version: obj.version ?? 2,
@@ -120,14 +138,14 @@ function normalize(raw: unknown): Database {
     accounts: Array.isArray(obj.accounts) ? obj.accounts : [],
     strategies: Array.isArray(obj.strategies) ? obj.strategies : [],
     trades: Array.isArray(obj.trades) ? obj.trades : [],
-    journals: shouldRefreshJournals ? demoJournals.map((j) => ({ ...j })) : (Array.isArray(obj.journals) ? obj.journals : []),
+    journals: Array.isArray(obj.journals) ? obj.journals : [],
     emotions: Array.isArray(obj.emotions) ? obj.emotions : base.emotions,
     screenshots: Array.isArray(obj.screenshots) ? obj.screenshots : [],
     users: Array.isArray(obj.users) && obj.users.length > 0 ? obj.users : base.users,
+    user_datasets: userDatasets,
   };
 }
 
-/** Baca database. Jika file belum ada, buat dari seed. */
 export async function readDb(): Promise<Database> {
   if (memoryDb) return memoryDb;
 
@@ -136,33 +154,120 @@ export async function readDb(): Promise<Database> {
     const parsed = normalize(JSON.parse(text));
     memoryDb = parsed;
     return parsed;
-  } catch (error) {
+  } catch {
     const fresh = seed();
     memoryDb = fresh;
     try {
       await persist(fresh);
     } catch {
-      // Abaikan jika serverless tidak mengizinkan penulisan
+      // Ignored
     }
     return fresh;
   }
 }
 
+/** Dapatkan email user aktif dari cookie session */
+export async function getActiveUserEmail(): Promise<string> {
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("tradelog_session")?.value;
+    if (sessionCookie) {
+      const parsed = JSON.parse(sessionCookie);
+      if (parsed?.email) {
+        return parsed.email.trim().toLowerCase();
+      }
+    }
+  } catch {
+    // Non-request context
+  }
+  return "marimasmangga21@gmail.com";
+}
+
+/** Ambil dataset spesifik milik user tertentu */
+export function getUserDataset(db: Database, email?: string): UserDataset {
+  const normEmail = (email || "").trim().toLowerCase() || "marimasmangga21@gmail.com";
+
+  if (!db.user_datasets) {
+    db.user_datasets = {};
+  }
+
+  if (db.user_datasets[normEmail]) {
+    return db.user_datasets[normEmail];
+  }
+
+  // Jika owner: gunakan data demo awal
+  if (normEmail === "marimasmangga21@gmail.com") {
+    const ownerDs: UserDataset = {
+      is_sample: true,
+      profile: {
+        ...demoProfile,
+        name: "Evan Mita",
+        email: "marimasmangga21@gmail.com",
+        avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
+      },
+      accounts: demoAccounts.map((a) => ({ ...a })),
+      strategies: demoStrategies.map((s) => ({ ...s })),
+      trades: demoTrades.map((t) => ({ ...t })),
+      journals: demoJournals.map((j) => ({ ...j })),
+      emotions: demoEmotions.map((e) => ({ ...e })),
+      screenshots: [],
+    };
+    db.user_datasets[normEmail] = ownerDs;
+    return ownerDs;
+  }
+
+  // Untuk akun lain / baru: data KOSONG MURNI
+  const newDataset: UserDataset = {
+    is_sample: false,
+    profile: {
+      ...demoProfile,
+      name: normEmail.split("@")[0] || "Trader",
+      email: normEmail,
+      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(normEmail)}`,
+    },
+    accounts: [],
+    strategies: [],
+    trades: [],
+    journals: [],
+    emotions: demoEmotions.map((e) => ({ ...e })),
+    screenshots: [],
+  };
+  db.user_datasets[normEmail] = newDataset;
+  return newDataset;
+}
+
 /**
- * Baca-ubah-tulis dalam satu kunci.
- * `keepSample` dipakai untuk perubahan yang tidak menyentuh isi jurnal
- * (mis. ganti mata uang tampilan) agar penanda "data contoh" tetap muncul.
+ * Baca-ubah-tulis scoped ke dataset user aktif
  */
 export async function mutateDb<T>(
-  fn: (db: Database) => T | Promise<T>,
-  options?: { keepSample?: boolean },
+  fn: (db: Database & UserDataset) => T | Promise<T>,
+  options?: { keepSample?: boolean; targetEmail?: string },
 ): Promise<T> {
+  const activeEmail = options?.targetEmail || (await getActiveUserEmail());
   return withLock(async () => {
     const db = await readDb();
-    const result = await fn(db);
+    const userDs = getUserDataset(db, activeEmail);
+
+    const scopedDb = new Proxy(db, {
+      get(target, prop, receiver) {
+        if (prop in userDs) {
+          return (userDs as any)[prop];
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+      set(target, prop, value, receiver) {
+        if (prop in userDs) {
+          (userDs as any)[prop] = value;
+          return true;
+        }
+        return Reflect.set(target, prop, value, receiver);
+      },
+    });
+
+    const result = await fn(scopedDb as any);
     db.version = (db.version ?? 1) + 1;
-    // Perubahan isi jurnal berarti ini bukan lagi data contoh murni.
-    if (!options?.keepSample) db.is_sample = false;
+    if (!options?.keepSample) userDs.is_sample = false;
     await persist(db);
     return result;
   });
@@ -176,12 +281,13 @@ export function nowIso(): string {
   return new Date().toISOString();
 }
 
-/** Hitung ulang balance_after untuk satu akun berdasarkan urutan trade. */
-export function recalcBalances(db: Database, accountId: string): void {
-  const account = db.accounts.find((a) => a.id === accountId);
+export function recalcBalances(db: Database & Partial<UserDataset>, accountId: string): void {
+  const accounts = db.accounts || [];
+  const account = accounts.find((a) => a.id === accountId);
   if (!account) return;
 
-  const list = db.trades
+  const trades = db.trades || [];
+  const list = trades
     .filter((t) => t.account_id === accountId)
     .sort((a, b) => new Date(a.traded_at).getTime() - new Date(b.traded_at).getTime());
 
@@ -210,43 +316,8 @@ export async function deleteScreenshotFile(storagePath: string): Promise<void> {
   try {
     await fs.unlink(screenshotDiskPath(storagePath));
   } catch {
-    // File sudah tidak ada — abaikan.
+    // Ignored
   }
-}
-
-async function clearFiles() {
-  for (const dir of [SCREENSHOT_DIR, UPLOAD_DIR]) {
-    try {
-      await fs.rm(dir, { recursive: true, force: true });
-    } catch {
-      // Folder belum ada — abaikan.
-    }
-  }
-}
-
-/** Muat ulang data contoh (menghapus semua data saat ini). */
-export async function resetDb(): Promise<void> {
-  await withLock(async () => {
-    await clearFiles();
-    await persist(seed());
-  });
-}
-
-/** Kosongkan jurnal: tidak ada akun, trade, jurnal, atau strategi. */
-export async function clearDb(): Promise<void> {
-  await withLock(async () => {
-    await clearFiles();
-    const base = seed();
-    await persist({
-      ...base,
-      is_sample: false,
-      accounts: [],
-      strategies: [],
-      trades: [],
-      journals: [],
-      screenshots: [],
-    });
-  });
 }
 
 export async function writeUploadFile(relativePath: string, bytes: Uint8Array): Promise<void> {
@@ -257,4 +328,58 @@ export async function writeUploadFile(relativePath: string, bytes: Uint8Array): 
 
 export function uploadDiskPath(relativePath: string): string {
   return path.join(UPLOAD_DIR, relativePath);
+}
+
+/** Reset database untuk user aktif (sample data atau kosongkan) */
+export async function resetUserDb(email: string, mode: "sample" | "empty"): Promise<void> {
+  await withLock(async () => {
+    const db = await readDb();
+    const normEmail = email.trim().toLowerCase();
+    if (!db.user_datasets) db.user_datasets = {};
+
+    if (mode === "sample") {
+      db.user_datasets[normEmail] = {
+        is_sample: true,
+        profile: {
+          ...demoProfile,
+          name: normEmail === "marimasmangga21@gmail.com" ? "Evan Mita" : normEmail.split("@")[0],
+          email: normEmail,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(normEmail)}`,
+        },
+        accounts: demoAccounts.map((a) => ({ ...a, id: newId() })),
+        strategies: demoStrategies.map((s) => ({ ...s, id: newId() })),
+        trades: demoTrades.map((t) => ({ ...t, id: newId() })),
+        journals: demoJournals.map((j) => ({ ...j, id: newId() })),
+        emotions: demoEmotions.map((e) => ({ ...e })),
+        screenshots: [],
+      };
+    } else {
+      db.user_datasets[normEmail] = {
+        is_sample: false,
+        profile: {
+          ...demoProfile,
+          name: normEmail.split("@")[0],
+          email: normEmail,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(normEmail)}`,
+        },
+        accounts: [],
+        strategies: [],
+        trades: [],
+        journals: [],
+        emotions: demoEmotions.map((e) => ({ ...e })),
+        screenshots: [],
+      };
+    }
+    await persist(db);
+  });
+}
+
+export async function resetDb(): Promise<void> {
+  const email = await getActiveUserEmail();
+  await resetUserDb(email, "sample");
+}
+
+export async function clearDb(): Promise<void> {
+  const email = await getActiveUserEmail();
+  await resetUserDb(email, "empty");
 }
