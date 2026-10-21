@@ -116,7 +116,7 @@ export async function readDb(): Promise<Database> {
     const fresh = seed();
     memoryDb = fresh;
     try {
-      await withLock(() => persist(fresh));
+      await persist(fresh);
     } catch {
       // Abaikan jika serverless tidak mengizinkan penulisan
     }
