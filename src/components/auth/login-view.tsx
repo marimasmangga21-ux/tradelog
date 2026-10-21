@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Eye, EyeOff, LoaderCircle, LogIn, UserPlus, Sparkles } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, LogIn, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 function GoogleIcon() {
   return (
@@ -51,7 +52,7 @@ export function LoginView() {
         return;
       }
 
-      // Login atau Signup
+      // Validasi ketat via backend yang mengecek Supabase Auth
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,7 +66,13 @@ export function LoginView() {
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Autentikasi gagal. Coba lagi.");
+        throw new Error(data.error || "Email atau password salah.");
+      }
+
+      if (data.needsConfirmation) {
+        setNotice(data.message || "Pendaftaran berhasil! Cek email Anda untuk konfirmasi aktivasi akun.");
+        toast.info("Periksa email Anda untuk verifikasi.");
+        return;
       }
 
       const userName = data.user?.name || "Trader";
@@ -77,7 +84,6 @@ export function LoginView() {
         toast.success(`Selamat datang kembali, ${userName}!`);
       }
 
-      // Pastikan redirect selalu ke Tradelog
       setTimeout(() => {
         window.location.href = redirectTarget;
       }, 400);
@@ -94,32 +100,25 @@ export function LoginView() {
     setNotice("");
 
     try {
-      const userEmail = email.trim() || "marimasmangga21@gmail.com";
-      const userName =
-        userEmail === "marimasmangga21@gmail.com"
-          ? "Evan Mita"
-          : userEmail.split("@")[0];
-
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`,
-        }),
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://tradelogjournal-app.vercel.app";
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/callback`,
+        },
       });
 
-      const data = await res.json();
-      if (data.ok) {
-        toast.success(`Selamat datang di Tradelog, ${userName}!`);
-        window.location.href = redirectTarget;
-      } else {
-        setMessage(data.error || "Gagal masuk dengan Google.");
-        setBusy(false);
+      if (error) {
+        throw error;
       }
-    } catch {
-      setMessage("Terjadi kesalahan saat masuk dengan Google.");
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Gagal memperoleh URL autentikasi Google.");
+      }
+    } catch (err: any) {
+      setMessage(err?.message || "Terjadi kesalahan saat masuk dengan Google.");
       setBusy(false);
     }
   };
@@ -127,13 +126,13 @@ export function LoginView() {
   return (
     <main className="auth-page">
       <section className="auth-card">
-        {/* Brand Icon & Name persis style Calculator */}
+        {/* Brand Icon & Name */}
         <div className="auth-brand-icon">
           <img src="/icon.png" alt="Logo" width="48" height="48" />
         </div>
         <p className="auth-brand-name">TRADELOG · PRECISION JOURNAL</p>
 
-        {/* Title & Description persis style Calculator */}
+        {/* Title */}
         <h1>
           {mode === "login"
             ? "Selamat datang kembali"
@@ -142,76 +141,74 @@ export function LoginView() {
             : "Reset password"}
         </h1>
 
-        <p className="auth-description">
-          {mode === "reset"
-            ? "Masukkan email akun. Kami akan mengirim tautan untuk membuat password baru."
-            : "Masuk untuk mencatat jurnal trading, performa analitik, dan riwayat posisi di akun Anda."}
+        <p className="auth-sub">
+          {mode === "login"
+            ? "Masuk untuk mencatat jurnal trading, performa analitik, dan riwayat posisi di akun Anda."
+            : mode === "signup"
+            ? "Mulai perjalanan trading berbasis data objektif dan evaluasi psikologi tanpa bias."
+            : "Masukkan email terdaftar Anda untuk menerima tautan pemulihan kata sandi."}
         </p>
 
+        {message && (
+          <div className="auth-alert error" role="alert">
+            {message}
+          </div>
+        )}
+
         {notice && (
-          <div className="auth-notice" role="status">
+          <div className="auth-alert success" role="status">
             {notice}
           </div>
         )}
 
         {/* Form Auth */}
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label className="auth-label" htmlFor="auth-email">
-            Email
-          </label>
-          <input
-            id="auth-email"
-            className="input-field"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="nama@email.com"
-          />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-field">
+            <label htmlFor="auth-email">Email</label>
+            <input
+              id="auth-email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="nama@domain.com"
+            />
+          </div>
 
           {mode !== "reset" && (
-            <>
-              <label className="auth-label" htmlFor="auth-password">
-                Password
-              </label>
-              <div className="auth-password-wrap">
+            <div className="auth-field">
+              <label htmlFor="auth-password">Password</label>
+              <div className="auth-password-wrapper">
                 <input
                   id="auth-password"
-                  className="input-field"
                   type={showPassword ? "text" : "password"}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  minLength={6}
                   required
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Minimal 8 karakter"
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Minimal 6 karakter"
+                  minLength={6}
                 />
                 <button
                   type="button"
                   className="auth-password-toggle"
-                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                  onClick={() => setShowPassword((visible) => !visible)}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
                 >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            </>
+            </div>
           )}
 
-          {message && (
-            <p className="auth-message" role="status">
-              {message}
-            </p>
-          )}
-
-          <button className="auth-submit w-full" type="submit" disabled={busy}>
+          <button type="submit" className="auth-submit" disabled={busy}>
             {busy ? (
-              <LoaderCircle size={17} className="auth-spinner" />
+              <LoaderCircle size={16} className="auth-spin" />
             ) : mode === "login" ? (
-              <LogIn size={17} />
+              <LogIn size={16} />
             ) : (
-              <UserPlus size={17} />
+              <UserPlus size={16} />
             )}
             <span>
               {busy
@@ -219,8 +216,8 @@ export function LoginView() {
                 : mode === "login"
                 ? "Masuk"
                 : mode === "signup"
-                ? "Daftar"
-                : "Kirim link reset"}
+                ? "Daftar Akun"
+                : "Kirim Link Reset"}
             </span>
           </button>
         </form>
@@ -242,7 +239,7 @@ export function LoginView() {
           </>
         )}
 
-        {/* Switch mode links persis style Calculator */}
+        {/* Switch mode links */}
         <div className="auth-switch">
           {mode === "login" ? (
             <>
@@ -253,6 +250,7 @@ export function LoginView() {
                   onClick={() => {
                     setMode("signup");
                     setMessage("");
+                    setNotice("");
                   }}
                 >
                   Daftar
@@ -264,6 +262,7 @@ export function LoginView() {
                   onClick={() => {
                     setMode("reset");
                     setMessage("");
+                    setNotice("");
                   }}
                 >
                   Lupa password?
@@ -276,28 +275,12 @@ export function LoginView() {
               onClick={() => {
                 setMode("login");
                 setMessage("");
+                setNotice("");
               }}
             >
               {mode === "reset" ? "Kembali ke masuk" : "Sudah punya akun? Masuk"}
             </button>
           )}
-        </div>
-
-        {/* Akses instan Owner */}
-        <div className="mt-4 pt-3 border-t border-[#222228] text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setEmail("marimasmangga21@gmail.com");
-              setPassword("trader123456");
-              handleGoogleLogin();
-            }}
-            disabled={busy}
-            className="text-[11px] text-[#71717a] hover:text-[#b2ff05] transition-colors inline-flex items-center gap-1.5"
-          >
-            <Sparkles className="h-3 w-3 text-[#b2ff05]" />
-            <span>Masuk instan akun Owner (marimasmangga21@gmail.com)</span>
-          </button>
         </div>
 
         <p className="auth-security-note">
