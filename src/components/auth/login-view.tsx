@@ -223,7 +223,7 @@ export function LoginView() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@domain.com"
+            placeholder="trader@gmail.com"
           />
 
           {mode !== "reset" && (
