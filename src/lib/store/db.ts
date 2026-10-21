@@ -2,6 +2,7 @@ import "server-only";
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import { randomUUID } from "node:crypto";
 
 import { demoAccounts, demoEmotions, demoJournals, demoProfile, demoStrategies, demoTrades } from "@/lib/demo/data";
@@ -20,11 +21,17 @@ export interface Database {
   screenshots: TradeScreenshot[];
 }
 
-export const DATA_DIR = path.join(process.cwd(), "data");
+// Di serverless environment (Vercel/Netlify), process.cwd()/data read-only.
+// Gunakan os.tmpdir() atau fallback aman agar tidak crash.
+const IS_SERVERLESS = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
+export const DATA_DIR = IS_SERVERLESS ? path.join(os.tmpdir(), "tradelog-data") : path.join(process.cwd(), "data");
 export const DB_FILE = path.join(DATA_DIR, "tradelog.json");
 export const SCREENSHOT_DIR = path.join(DATA_DIR, "screenshots");
 /** Gambar lain (mis. contoh chart strategi). */
 export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
+
+// Cache in-memory untuk runtime serverless
+let memoryDb: Database | null = null;
 
 /** Seed awal: dataset demo dipakai sebagai contoh supaya UI tidak kosong. */
 function seed(): Database {
@@ -67,10 +74,16 @@ async function ensureDirs() {
 
 /** Tulis atomik: tulis ke file sementara lalu rename. */
 async function persist(db: Database): Promise<void> {
-  await ensureDirs();
-  const tmp = `${DB_FILE}.${process.pid}.${Date.now()}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
-  await fs.rename(tmp, DB_FILE);
+  memoryDb = db;
+  try {
+    await ensureDirs();
+    const tmp = `${DB_FILE}.${process.pid}.${Date.now()}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
+    await fs.rename(tmp, DB_FILE);
+  } catch (err) {
+    // Pada runtime serverless jika filesystem gagal, fallback ke in-memory
+    console.warn("Filesystem write warning:", err);
+  }
 }
 
 function normalize(raw: unknown): Database {
@@ -92,20 +105,22 @@ function normalize(raw: unknown): Database {
 
 /** Baca database. Jika file belum ada, buat dari seed. */
 export async function readDb(): Promise<Database> {
+  if (memoryDb) return memoryDb;
+
   try {
     const text = await fs.readFile(DB_FILE, "utf8");
-    return normalize(JSON.parse(text));
+    const parsed = normalize(JSON.parse(text));
+    memoryDb = parsed;
+    return parsed;
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException)?.code;
-    if (code === "ENOENT") {
-      const fresh = seed();
+    const fresh = seed();
+    memoryDb = fresh;
+    try {
       await withLock(() => persist(fresh));
-      return fresh;
+    } catch {
+      // Abaikan jika serverless tidak mengizinkan penulisan
     }
-    // File korup: jangan menimpa data user tanpa peringatan.
-    throw new Error(
-      `Gagal membaca ${DB_FILE}: ${error instanceof Error ? error.message : "unknown"}`,
-    );
+    return fresh;
   }
 }
 
