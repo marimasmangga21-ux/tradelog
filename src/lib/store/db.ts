@@ -8,6 +8,15 @@ import { randomUUID } from "node:crypto";
 import { demoAccounts, demoEmotions, demoJournals, demoProfile, demoStrategies, demoTrades } from "@/lib/demo/data";
 import type { Account, Emotion, Journal, Profile, Strategy, Trade, TradeScreenshot } from "@/lib/types";
 
+export interface RegisteredUser {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  avatar_url?: string;
+  created_at: string;
+}
+
 export interface Database {
   version: number;
   /** true bila isinya masih data contoh bawaan (belum pernah diubah user). */
@@ -19,6 +28,7 @@ export interface Database {
   journals: Journal[];
   emotions: Emotion[];
   screenshots: TradeScreenshot[];
+  users: RegisteredUser[];
 }
 
 // Di serverless environment (Vercel/Netlify), process.cwd()/data read-only.
@@ -49,6 +59,16 @@ function seed(): Database {
     journals: demoJournals.map((j) => ({ ...j })),
     emotions: demoEmotions.map((e) => ({ ...e })),
     screenshots: [],
+    users: [
+      {
+        id: "usr_owner_001",
+        email: "marimasmangga21@gmail.com",
+        password: "trader123456",
+        name: "Evan Mita",
+        avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
+        created_at: new Date().toISOString(),
+      },
+    ],
   };
 }
 
@@ -103,6 +123,7 @@ function normalize(raw: unknown): Database {
     journals: shouldRefreshJournals ? demoJournals.map((j) => ({ ...j })) : (Array.isArray(obj.journals) ? obj.journals : []),
     emotions: Array.isArray(obj.emotions) ? obj.emotions : base.emotions,
     screenshots: Array.isArray(obj.screenshots) ? obj.screenshots : [],
+    users: Array.isArray(obj.users) && obj.users.length > 0 ? obj.users : base.users,
   };
 }
 

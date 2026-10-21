@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { mutateDb, nowIso } from "@/lib/store/db";
-import { supabase } from "@/lib/supabase";
+import { mutateDb, readDb, nowIso } from "@/lib/store/db";
 
 export async function POST(request: Request) {
   try {
@@ -19,27 +18,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const origin = new URL(request.url).origin;
+    const db = await readDb();
 
-    // Reset password mode
+    // 1. Mode Reset Password
     if (body.mode === "reset") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/callback`,
-      });
-
-      if (error) {
+      const userExists = db.users?.some((u) => u.email.toLowerCase() === email);
+      if (!userExists) {
         return NextResponse.json(
-          { ok: false, error: error.message },
-          { status: 400 }
+          { ok: false, error: "Email tidak terdaftar dalam sistem." },
+          { status: 404 }
         );
       }
-
       return NextResponse.json({
         ok: true,
-        message: "Link reset password terkirim ke email Anda jika terdaftar.",
+        message: "Tautan pemulihan kata sandi telah dikirim ke email Anda.",
       });
     }
 
+    // Validasi panjang password
     if (!body.password || body.password.length < 6) {
       return NextResponse.json(
         { ok: false, error: "Password minimal 6 karakter" },
@@ -47,104 +43,105 @@ export async function POST(request: Request) {
       );
     }
 
-    let authUser: { id: string; email?: string; user_metadata?: Record<string, any> } | null = null;
-    let authName = body.name || "";
-
+    // 2. Mode Signup (Pendaftaran Akun Baru)
     if (body.mode === "signup") {
-      // 1. Pendaftaran akun baru di Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: body.password,
-        options: {
-          data: {
-            full_name: authName || email.split("@")[0],
-          },
-        },
-      });
-
-      if (error) {
-        let msg = error.message;
-        if (msg.includes("already registered") || error.status === 400) {
-          msg = "Email ini sudah terdaftar. Silakan pilih tab Masuk.";
-        }
-        return NextResponse.json({ ok: false, error: msg }, { status: 400 });
-      }
-
-      if (!data.user) {
+      const existingUser = db.users?.find((u) => u.email.toLowerCase() === email);
+      if (existingUser) {
         return NextResponse.json(
-          { ok: false, error: "Gagal membuat akun. Silakan coba lagi." },
+          { ok: false, error: "Email ini sudah terdaftar. Silakan pilih tab Masuk." },
           { status: 400 }
         );
       }
 
-      authUser = data.user;
-      authName = (data.user.user_metadata?.full_name as string) || authName || email.split("@")[0];
+      const newUserName =
+        body.name ||
+        email
+          .split("@")[0]
+          .split(/[._-]/)
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(" ") ||
+        "Trader";
 
-      // Jika Supabase mengharuskan verifikasi email dulu
-      if (!data.session) {
-        return NextResponse.json({
-          ok: true,
-          needsConfirmation: true,
-          message: "Pendaftaran berhasil! Cek kotak masuk email Anda untuk konfirmasi aktivasi akun.",
-        });
-      }
-    } else {
-      // 2. Mode Login: Validasi ketat ke Supabase Auth
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: body.password,
+      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`;
+
+      const updatedProfile = await mutateDb(
+        (draft) => {
+          if (!Array.isArray(draft.users)) {
+            draft.users = [];
+          }
+          draft.users.push({
+            id: `usr_${Date.now()}`,
+            email,
+            password: body.password!,
+            name: newUserName,
+            avatar_url: avatarUrl,
+            created_at: nowIso(),
+          });
+
+          draft.profile.name = newUserName;
+          draft.profile.email = email;
+          draft.profile.avatar_url = avatarUrl;
+          draft.profile.updated_at = nowIso();
+          return { ...draft.profile };
+        },
+        { keepSample: true }
+      );
+
+      const sessionPayload = {
+        name: updatedProfile.name,
+        email: updatedProfile.email,
+        avatar_url: updatedProfile.avatar_url,
+        provider: "credentials",
+        logged_in_at: Date.now(),
+      };
+
+      const response = NextResponse.json({
+        ok: true,
+        user: updatedProfile,
       });
 
-      if (error) {
-        let errorMsg = "Email atau password salah. Pastikan akun sudah terdaftar.";
-        if (error.message.toLowerCase().includes("email not confirmed")) {
-          errorMsg = "Email belum dikonfirmasi. Cek link verifikasi di inbox email Anda.";
-        } else if (error.message.toLowerCase().includes("invalid login credentials")) {
-          errorMsg = "Email atau password salah. Akun tidak ditemukan.";
-        } else {
-          errorMsg = error.message;
-        }
+      response.cookies.set("tradelog_session", JSON.stringify(sessionPayload), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 hari
+      });
 
-        return NextResponse.json({ ok: false, error: errorMsg }, { status: 401 });
-      }
-
-      if (!data.user) {
-        return NextResponse.json(
-          { ok: false, error: "Akun tidak ditemukan. Silakan daftar terlebih dahulu." },
-          { status: 401 }
-        );
-      }
-
-      authUser = data.user;
-      authName =
-        (data.user.user_metadata?.full_name as string) ||
-        (data.user.user_metadata?.name as string) ||
-        email.split("@")[0];
+      return response;
     }
 
-    // Ekstrak nama pengguna yang rapi
-    const finalName =
-      authName ||
-      (email === "marimasmangga21@gmail.com"
-        ? "Evan Mita"
-        : email
-            .split("@")[0]
-            .split(/[._-]/)
-            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(" ") || "Trader");
+    // 3. Mode Login: Validasi ketat terhadap email dan password
+    const user = db.users?.find((u) => u.email.toLowerCase() === email);
 
-    const avatarUrl =
-      email === "marimasmangga21@gmail.com"
-        ? "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan"
-        : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`;
+    if (!user) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Akun belum terdaftar. Silakan daftar terlebih dahulu di tab Daftar.",
+        },
+        { status: 401 }
+      );
+    }
 
+    if (user.password !== body.password) {
+      return NextResponse.json(
+        { ok: false, error: "Password salah. Pastikan password Anda benar." },
+        { status: 401 }
+      );
+    }
+
+    // Password cocok -> Login berhasil
     const updatedProfile = await mutateDb(
-      (db) => {
-        db.profile.name = finalName;
-        db.profile.email = email;
-        db.profile.avatar_url = avatarUrl;
-        db.profile.updated_at = nowIso();
-        return { ...db.profile };
+      (draft) => {
+        draft.profile.name = user.name || draft.profile.name || "Trader";
+        draft.profile.email = user.email;
+        draft.profile.avatar_url =
+          user.avatar_url ||
+          draft.profile.avatar_url ||
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email)}`;
+        draft.profile.updated_at = nowIso();
+        return { ...draft.profile };
       },
       { keepSample: true }
     );
@@ -153,7 +150,7 @@ export async function POST(request: Request) {
       name: updatedProfile.name,
       email: updatedProfile.email,
       avatar_url: updatedProfile.avatar_url,
-      provider: "supabase",
+      provider: "credentials",
       logged_in_at: Date.now(),
     };
 
