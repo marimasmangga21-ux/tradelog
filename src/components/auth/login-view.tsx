@@ -15,7 +15,9 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
-const GOOGLE_CLIENT_ID = "960568853150-ii7c2r206m475eeraihh76g08qcdc23k.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "1007560172153-vtvs7npak2q6uk4puoll1ij9bt3r68k6.apps.googleusercontent.com";
 
 function GoogleIcon() {
   return (
