@@ -35,12 +35,12 @@ const GOOGLE_CLIENT_ID =
 const DEMO_GOOGLE_ACCOUNTS = [
   {
     name: "Evan Mita",
-    email: "evan.trader21@gmail.com",
+    email: "marimasmangga21@gmail.com",
     avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
   },
   {
-    name: "Professional Trader",
-    email: "pro.investor@gmail.com",
+    name: "Trader Pro",
+    email: "trader.mita@gmail.com",
     avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
   },
 ];
@@ -232,38 +232,104 @@ export function LoginView() {
             </div>
 
             {/* Google Sign In Options */}
-            <div className="mt-8 space-y-3">
-              {/* Official Google Button (jika origin diizinkan di Cloud Console) */}
-              <div ref={googleBtnRef} className="w-full flex justify-center empty:hidden" />
-
-              {/* Real Google OAuth Login Button */}
+            <div className="mt-7 space-y-3.5">
+              {/* Quick 1-Click Profile Login */}
               <button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={() => executeGoogleLogin(DEMO_GOOGLE_ACCOUNTS[0])}
                 disabled={loading}
                 className={cn(
-                  "group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-black transition-all duration-200 hover:bg-[#b2ff05] hover:shadow-[0_0_24px_rgba(178,255,5,0.4)] active:scale-[0.98] shadow-lg",
-                  loading && "opacity-70 cursor-not-allowed"
+                  "group relative flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#121215] p-3.5 transition-all duration-200 hover:border-[#b2ff05]/60 hover:bg-[#18181e] active:scale-[0.98] shadow-lg",
+                  loading && "opacity-60 cursor-not-allowed"
                 )}
               >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <img
+                      src={DEMO_GOOGLE_ACCOUNTS[0].avatar_url}
+                      alt={DEMO_GOOGLE_ACCOUNTS[0].name}
+                      className="h-11 w-11 rounded-full border border-white/15 bg-[#27272a] object-cover"
+                    />
+                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#b2ff05] text-black">
+                      <CheckCircle2 className="h-3 w-3 stroke-[3]" />
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-bold text-white">{DEMO_GOOGLE_ACCOUNTS[0].name}</p>
+                      <span className="rounded bg-[#b2ff05] px-1.5 py-0.5 text-[9px] font-black text-black shadow-[0_0_8px_rgba(178,255,5,0.4)]">
+                        Owner
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#8e8e93] font-mono mt-0.5">{DEMO_GOOGLE_ACCOUNTS[0].email}</p>
+                  </div>
+                </div>
                 {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-black" />
+                  <Loader2 className="h-4 w-4 animate-spin text-[#b2ff05]" />
                 ) : (
-                  <GoogleIcon className="h-5 w-5" />
+                  <div className="flex items-center gap-1 rounded-xl bg-white/[0.05] px-3 py-1.5 text-xs font-bold text-[#b2ff05] group-hover:bg-[#b2ff05] group-hover:text-black transition-all">
+                    <span>Masuk</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
                 )}
-                <span>Masuk dengan Google</span>
               </button>
 
-              {/* Opsi Cepat / Masuk Demo */}
-              <div className="pt-2 text-center">
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-white/[0.08]" />
+                <span className="flex-shrink mx-3 text-[10px] text-[#71717a] uppercase tracking-wider font-semibold">
+                  Atau Masuk dengan Email Lain
+                </span>
+                <div className="flex-grow border-t border-white/[0.08]" />
+              </div>
+
+              {/* Direct Email Input on Card */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!customEmail) {
+                    toast.error("Email wajib diisi");
+                    return;
+                  }
+                  executeGoogleLogin({
+                    name: customName || customEmail.split("@")[0],
+                    email: customEmail,
+                    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${customEmail}`,
+                  });
+                }}
+                className="space-y-2.5"
+              >
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="email.anda@gmail.com"
+                    value={customEmail}
+                    onChange={(e) => setCustomEmail(e.target.value)}
+                    className="h-10 bg-[#121215] border-white/10 text-xs rounded-xl focus:border-[#b2ff05]/50"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !customEmail}
+                  className="w-full h-10 bg-[#b2ff05] text-black hover:bg-[#9fe000] font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(178,255,5,0.25)] transition-all"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-black" />
+                  ) : (
+                    <span>Masuk Sekarang</span>
+                  )}
+                </Button>
+              </form>
+
+              {/* Real Google OAuth Redirect Button */}
+              <div className="pt-1">
                 <button
                   type="button"
-                  onClick={() => setModalOpen(true)}
+                  onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#b2ff05] transition-colors py-1 px-3 rounded-lg hover:bg-white/[0.04]"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0c0c0e] px-3 py-2 text-xs text-[#a1a1aa] hover:border-white/20 hover:text-white transition-all"
                 >
-                  <KeyRound className="h-3.5 w-3.5" />
-                  <span>Opsi Akun Demo / Manual</span>
+                  <GoogleIcon className="h-3.5 w-3.5" />
+                  <span>Google OAuth (Browser Login)</span>
                 </button>
               </div>
             </div>
