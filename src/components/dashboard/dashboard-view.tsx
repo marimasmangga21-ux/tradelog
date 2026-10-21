@@ -119,7 +119,7 @@ export function DashboardView({
       {/* MOBILE UI VIEW (PRESISI GAMBAR 4 DARI DOKUMENTASI)           */}
       {/* Ditampilkan di layar ponsel atau iPhone simulator            */}
       {/* ============================================================ */}
-      <div className="block lg:hidden px-4 pt-1 pb-28 space-y-3.5 bg-[#09090b] text-[#f2f2f0] min-h-screen">
+      <div className="block lg:hidden space-y-3.5">
         {/* 1. All Accounts Card (Gambar 4) */}
         <div className="mobile-card p-4 transition-all duration-200">
           <div className="flex items-center justify-between">

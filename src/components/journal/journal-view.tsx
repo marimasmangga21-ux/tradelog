@@ -172,8 +172,26 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4">
+      {/* Mobile Top Sub-tabs TRADES vs JOURNALS */}
+      <div className="flex items-center gap-6 border-b border-white/[0.08] pb-2 px-1 lg:hidden">
+        <Link
+          href="/trades"
+          className="pb-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#71717a] hover:text-white transition"
+        >
+          <span>TRADES</span>
+        </Link>
+        <button
+          type="button"
+          className="relative pb-2 font-mono text-xs font-bold uppercase tracking-wider text-white"
+        >
+          <span>JOURNALS</span>
+          <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]" />
+        </button>
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden lg:flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[#f2f2f0] sm:text-3xl">
             {t("journal.title")}
@@ -194,26 +212,36 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
       <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         {/* Daftar jurnal */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Select value={emotionFilter} onValueChange={setEmotionFilter}>
-              <SelectTrigger className="h-9 w-full max-w-[200px] text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("journal.allEmotions")}</SelectItem>
-                {emotions.map((e) => (
-                  <SelectItem key={e.id} value={e.id}>
-                    <span className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: e.color }} />
-                      {e.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="text-[11px] text-muted-foreground">
-              {filteredJournals.length} {t("common.of")} {journals.length}
-            </span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1">
+              <Select value={emotionFilter} onValueChange={setEmotionFilter}>
+                <SelectTrigger className="h-9 w-full max-w-[180px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("journal.allEmotions")}</SelectItem>
+                  {emotions.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: e.color }} />
+                        {e.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                {filteredJournals.length} {t("common.of")} {journals.length}
+              </span>
+            </div>
+            <Button
+              size="sm"
+              className="lg:hidden gap-1 bg-[#b2ff05] text-black font-bold hover:bg-[#9fe000] rounded-xl h-9 text-xs px-3 shadow-[0_0_12px_rgba(178,255,5,0.3)] shrink-0"
+              onClick={openNew}
+            >
+              <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+              <span>{t("journal.new")}</span>
+            </Button>
           </div>
 
           {filteredJournals.length === 0 ? (

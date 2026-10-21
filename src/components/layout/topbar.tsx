@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 export function Topbar() {
   const pathname = usePathname();
   const { syncMt5, syncingMt5, profile } = useData();
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   async function handleSync() {
     toast.info("Syncing MT5 accounts...", { duration: 2500 });
@@ -44,8 +45,8 @@ export function Topbar() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-[#1a1a1a] bg-black/90 px-4 backdrop-blur-md sm:px-6">
-      {/* Mobile Topbar View: Logo TRADELOG + Profil Pill (Sesuai Referensi Gambar) */}
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-[#1a1a1a] bg-black/90 px-3 backdrop-blur-md sm:px-6">
+      {/* Mobile Topbar View: Logo TRADELOG + Profil Pill + Drawer */}
       <div className="flex w-full items-center justify-between lg:hidden">
         <Link href="/dashboard" className="flex items-center gap-2">
           <img
@@ -61,17 +62,58 @@ export function Topbar() {
         <div className="flex items-center gap-2">
           <Link
             href="/settings"
-            className="flex items-center gap-2 rounded-full bg-white/[0.04] p-1 pr-2.5 border border-white/[0.06] hover:border-white/20 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-white/[0.04] p-1 pr-2.5 border border-white/[0.06] hover:border-white/20 transition-colors"
           >
             <img
               src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan"}
               alt={profile?.name || "Evan Mita"}
               className="h-6 w-6 rounded-full bg-[#27272a] object-cover"
             />
-            <span className="text-[11px] font-semibold text-white">
+            <span className="text-[11px] font-semibold text-white max-w-[80px] truncate">
               {profile?.name || "Evan Mita"}
             </span>
           </Link>
+
+          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-[#141418] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white transition-colors"
+                aria-label="Open menu"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] border-white/10 bg-[#09090b] p-5 text-white">
+              <SheetHeader className="text-left pb-4 border-b border-white/10">
+                <SheetTitle className="flex items-center gap-2 text-white">
+                  <img src="/logo-icon.png" alt="TRADELOG" className="h-6 w-6 rounded-md" />
+                  <span className="font-mono text-sm font-extrabold tracking-wider text-[#b2ff05]">
+                    TRADELOG
+                  </span>
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-5 space-y-4">
+                <MobileMenuList onSelect={() => setDrawerOpen(false)} />
+                <div className="pt-4 border-t border-white/10">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      handleSync();
+                    }}
+                    disabled={syncingMt5}
+                    className="w-full justify-center gap-2 rounded-xl border-white/10 bg-[#121215] text-xs text-white hover:border-[#b2ff05]/40 hover:text-[#b2ff05]"
+                  >
+                    <RefreshCw className={cn("h-3.5 w-3.5", syncingMt5 && "animate-spin text-[#b2ff05]")} />
+                    <span>{syncingMt5 ? "Syncing..." : "Sync MT5"}</span>
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

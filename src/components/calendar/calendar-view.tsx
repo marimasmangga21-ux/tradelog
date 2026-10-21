@@ -231,125 +231,181 @@ export function CalendarView({
       {/* ============================================================ */}
       {/* MOBILE CALENDAR VIEW (MONTHLY P&L HEATMAP)                   */}
       {/* ============================================================ */}
-      <div className="lg:hidden space-y-4 mb-6">
+      <div className="lg:hidden space-y-3.5 mb-6">
         {/* Monthly P&L Heatmap Card */}
         <div className="mobile-card p-4 space-y-3">
+          {/* Month Selector Bar */}
           <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-white">Monthly P&L Heatmap</p>
-            <span className="font-mono text-xs text-[#a1a1aa] font-medium">{monthLabel}</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => shiftMonth(-1)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-[#a1a1aa] hover:text-white"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="font-mono text-xs font-bold text-white tracking-wide">{monthLabel}</span>
+              <button
+                type="button"
+                onClick={() => shiftMonth(1)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-[#a1a1aa] hover:text-white"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={goToday}
+              className="rounded-lg border border-white/10 bg-[#141418] px-2.5 py-1 text-[10px] font-semibold text-white hover:border-[#b2ff05]/40"
+            >
+              Today
+            </button>
           </div>
 
-          {/* Weekday headers Sun - Sat */}
+          {/* Weekday headers Mon - Sun */}
           <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-[#71717a]">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
               <span key={day}>{day}</span>
             ))}
           </div>
 
-          {/* Heatmap Grid sesuai mockup Gambar 1 */}
+          {/* Heatmap Grid dinamis */}
           <div className="grid grid-cols-7 gap-1">
-            {/* Blank offset 3 cells */}
-            <div className="aspect-square rounded-lg bg-white/[0.02]" />
-            <div className="aspect-square rounded-lg bg-white/[0.02]" />
-            <div className="aspect-square rounded-lg bg-white/[0.02]" />
+            {cells.map((cell, idx) => {
+              if (!cell.day || !cell.key) {
+                return <div key={`empty-${idx}`} className="aspect-square rounded-lg bg-white/[0.02]" />;
+              }
+              const aggregate = byDay.get(cell.key);
+              const pnl = aggregate?.pnl ?? 0;
+              const count = aggregate?.trades.length ?? 0;
+              const isSelected = selected === cell.key;
+              const isToday = cell.key === todayKey;
 
-            {/* Day 1: Active with yellow/lime outline */}
-            <div className="aspect-square rounded-lg border-2 border-[#b2ff05] bg-black/40 p-1 flex flex-col justify-between shadow-[0_0_8px_rgba(178,255,5,0.3)]">
-              <span className="text-[9px] font-bold text-[#b2ff05]">1</span>
-            </div>
+              let bgClass = "bg-white/[0.03] text-[#71717a]";
+              let borderClass = "border-transparent";
+              let pnlNode = null;
 
-            {/* Day 2: Loss */}
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">2</span>
-              <span className="font-mono text-[8px] font-bold text-red-400">-$85</span>
-            </div>
+              if (count > 0) {
+                if (pnl > 0) {
+                  bgClass = "bg-emerald-950/40 text-[#a1a1aa]";
+                  borderClass = "border border-emerald-500/30";
+                  pnlNode = (
+                    <span className="font-mono text-[8px] font-bold text-emerald-400">
+                      +{hideAmounts ? "••" : `$${Math.round(pnl)}`}
+                    </span>
+                  );
+                } else if (pnl < 0) {
+                  bgClass = "bg-red-950/40 text-[#a1a1aa]";
+                  borderClass = "border border-red-500/30";
+                  pnlNode = (
+                    <span className="font-mono text-[8px] font-bold text-red-400">
+                      -{hideAmounts ? "••" : `$${Math.abs(Math.round(pnl))}`}
+                    </span>
+                  );
+                } else {
+                  pnlNode = <span className="font-mono text-[8px] text-[#71717a]">$0</span>;
+                }
+              }
 
-            {/* Day 3: Profit */}
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">3</span>
-              <span className="font-mono text-[8px] font-bold text-emerald-400">+$120</span>
-            </div>
-
-            {/* Day 4: Profit */}
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">4</span>
-              <span className="font-mono text-[8px] font-bold text-emerald-400">+$150</span>
-            </div>
-
-            {/* Day 5: Loss */}
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">5</span>
-              <span className="font-mono text-[8px] font-bold text-red-400">-$85</span>
-            </div>
-
-            {/* Day 6: Profit */}
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">6</span>
-              <span className="font-mono text-[8px] font-bold text-emerald-400">+$120</span>
-            </div>
-
-            {/* Day 7: Profit */}
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">7</span>
-              <span className="font-mono text-[8px] font-bold text-emerald-400">+$450</span>
-            </div>
-
-            {/* Day 8: Flat */}
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#71717a]">8</span>
-            </div>
-
-            {/* Day 9: Profit */}
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">9</span>
-              <span className="font-mono text-[8px] font-bold text-emerald-400">+$450</span>
-            </div>
-
-            {/* Day 10: Loss */}
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#a1a1aa]">10</span>
-              <span className="font-mono text-[8px] font-bold text-red-400">-$190</span>
-            </div>
-
-            {/* Day 11: Flat */}
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1 flex flex-col justify-between">
-              <span className="text-[9px] text-[#71717a]">11</span>
-            </div>
-
-            {/* Day 12-30 Grid */}
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">12</span></div>
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">13</span><span className="font-mono text-[8px] font-bold text-emerald-400">+$450</span></div>
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">14</span><span className="font-mono text-[8px] font-bold text-red-400">-$190</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">15</span></div>
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">16</span><span className="font-mono text-[8px] font-bold text-emerald-400">+$120</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">17</span></div>
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">18</span><span className="font-mono text-[8px] font-bold text-red-400">-$85</span></div>
-
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">19</span></div>
-            <div className="aspect-square rounded-lg bg-emerald-950/40 border border-emerald-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">20</span><span className="font-mono text-[8px] font-bold text-emerald-400">+$120</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">21</span></div>
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">22</span><span className="font-mono text-[8px] font-bold text-red-400">-$190</span></div>
-            <div className="aspect-square rounded-lg bg-red-950/40 border border-red-500/30 p-1 flex flex-col justify-between"><span className="text-[9px] text-[#a1a1aa]">23</span><span className="font-mono text-[8px] font-bold text-red-400">-$85</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">24</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">25</span></div>
-
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">26</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">27</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">28</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">29</span></div>
-            <div className="aspect-square rounded-lg bg-white/[0.04] p-1"><span className="text-[9px] text-[#71717a]">30</span></div>
+              return (
+                <button
+                  key={cell.key}
+                  type="button"
+                  onClick={() => setSelected(cell.key)}
+                  className={cn(
+                    "aspect-square rounded-lg p-1 flex flex-col justify-between text-left transition-all",
+                    bgClass,
+                    borderClass,
+                    isSelected && "ring-2 ring-[#b2ff05] shadow-[0_0_8px_rgba(178,255,5,0.4)] z-10",
+                    isToday && !isSelected && "border border-[#b2ff05]/40",
+                  )}
+                >
+                  <span className={cn("text-[9px] font-bold", isSelected ? "text-[#b2ff05]" : "text-[#d4d4d8]")}>
+                    {cell.day}
+                  </span>
+                  {pnlNode}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Footer Pills (Gambar 1) */}
-          <div className="flex items-center gap-2 pt-2">
-            <div className="flex-1 rounded-xl border border-[#b2ff05]/40 bg-[#141418] p-2.5 text-center">
-              <span className="text-xs font-bold text-[#b2ff05]">Best Day: +$840</span>
+          {/* Footer Summary Pills */}
+          <div className="flex items-center gap-2 pt-1.5">
+            <div className="flex-1 rounded-xl border border-[#b2ff05]/40 bg-[#141418] p-2 text-center">
+              <span className="text-[10px] text-[#8e8e93] block">Best Day</span>
+              <span className="text-xs font-bold text-[#b2ff05] font-mono">
+                {monthStats.bestDay
+                  ? `+$${Math.round(monthStats.bestDay.pnl)}`
+                  : "$0"}
+              </span>
             </div>
-            <div className="flex-1 rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-2.5 text-center">
-              <span className="text-xs font-bold text-emerald-400">Overall: +$2,140</span>
+            <div className="flex-1 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-2 text-center">
+              <span className="text-[10px] text-[#8e8e93] block">Net P&L</span>
+              <span
+                className={cn(
+                  "text-xs font-bold font-mono",
+                  monthStats.netPnl >= 0 ? "text-emerald-400" : "text-red-400",
+                )}
+              >
+                {monthStats.netPnl >= 0 ? "+" : ""}${Math.round(monthStats.netPnl).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex-1 rounded-xl border border-white/10 bg-[#141418] p-2 text-center">
+              <span className="text-[10px] text-[#8e8e93] block">Win Rate</span>
+              <span className="text-xs font-bold text-white font-mono">
+                {monthStats.winRate.toFixed(0)}%
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Selected Day Trades on Mobile */}
+        {selected && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-bold text-white tracking-tight">
+                Trades on {selected}
+              </span>
+              <span className="text-[11px] font-mono text-[#8e8e93]">
+                {selectedDay?.trades.length ?? 0} trade(s)
+              </span>
+            </div>
+
+            {(!selectedDay || selectedDay.trades.length === 0) ? (
+              <div className="mobile-card p-4 text-center text-xs text-[#71717a]">
+                Tidak ada trade yang dieksekusi pada tanggal ini.
+              </div>
+            ) : (
+              selectedDay.trades.map((trade) => {
+                const isProfit = (trade.pnl || 0) >= 0;
+                return (
+                  <Link
+                    key={trade.id}
+                    href={`/trades/${trade.id}`}
+                    className="mobile-card block p-3 hover:border-white/20 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-white">{trade.instrument}</span>
+                        <span
+                          className={cn(
+                            "rounded px-1.5 py-0.5 text-[9px] font-black uppercase",
+                            trade.direction === "long" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400",
+                          )}
+                        >
+                          {trade.direction}
+                        </span>
+                      </div>
+                      <span className={cn("font-mono text-xs font-bold", isProfit ? "text-[#b2ff05]" : "text-red-400")}>
+                        {isProfit ? "+" : ""}${Math.abs(trade.pnl || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
+          </div>
+        )}
       </div>
 
       {/* Desktop Calendar View (Tradoxes Theme) */}

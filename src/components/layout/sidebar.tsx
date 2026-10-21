@@ -405,8 +405,11 @@ export function MobileNav() {
 
 export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
-  // Hilangkan Mobile Studio dari menu di HP
-  const mobileNavItems = NAV_ITEMS.filter((item) => item.href !== "/preview");
+  // Hilangkan Mobile Studio dari menu di HP, tambahkan Settings
+  const mobileNavItems = [
+    ...NAV_ITEMS.filter((item) => item.href !== "/preview"),
+    { href: "/settings", label: "Settings", icon: Settings },
+  ];
 
   return (
     <div className="space-y-1">
@@ -419,8 +422,10 @@ export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
             href={item.href}
             onClick={onSelect}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium",
-              active ? "bg-[#121214] text-[#b2ff05]" : "text-[#a0a0a0] hover:text-[#f2f2f0]",
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              active
+                ? "bg-[#b2ff05]/15 text-[#b2ff05] font-semibold"
+                : "text-[#a0a0a0] hover:bg-white/[0.04] hover:text-white",
             )}
           >
             <Icon className="h-4 w-4" />

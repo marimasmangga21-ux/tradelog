@@ -49,7 +49,7 @@ type SortKey = "newest" | "oldest" | "pnlHigh" | "pnlLow" | "rrHigh";
 
 export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
   const { t, locale } = useI18n();
-  const { trades, accounts, strategies } = useData();
+  const { trades, accounts, strategies, journals, emotions } = useData();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -167,38 +167,60 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
     rrHigh: t("trades.sortRrHigh"),
   };
 
+  const latestJournal = journals && journals.length > 0 ? journals[0] : null;
+  const journalEmotions = latestJournal ? emotions.filter((e) => latestJournal.emotion_ids.includes(e.id)) : [];
+
   return (
     <div>
-      <PageHeader
-        title={t("trades.title")}
-        description={t("trades.subtitle")}
-        actions={
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Download className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t("trades.exportCsv")}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel>{t("trades.exportCsv")}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => { window.location.href = "/api/export/trades"; }}>
-                  <Download className="h-4 w-4" />
-                  {t("trades.exportCsv")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button asChild size="sm" className="gap-1.5">
-              <Link href="/trades/new">
-                <Plus className="h-4 w-4" />
-                {t("trades.new")}
-              </Link>
-            </Button>
-          </>
-        }
-      />
+      {/* Mobile Top Sub-tabs TRADES vs JOURNALS */}
+      <div className="flex items-center gap-6 border-b border-white/[0.08] pb-2 px-1 lg:hidden mb-3.5">
+        <button
+          type="button"
+          className="relative pb-2 font-mono text-xs font-bold uppercase tracking-wider text-white"
+        >
+          <span>TRADES</span>
+          <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]" />
+        </button>
+        <Link
+          href="/journal"
+          className="pb-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#71717a] hover:text-white transition"
+        >
+          <span>JOURNALS</span>
+        </Link>
+      </div>
+
+      <div className="hidden lg:block">
+        <PageHeader
+          title={t("trades.title")}
+          description={t("trades.subtitle")}
+          actions={
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <Download className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{t("trades.exportCsv")}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuLabel>{t("trades.exportCsv")}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => { window.location.href = "/api/export/trades"; }}>
+                    <Download className="h-4 w-4" />
+                    {t("trades.exportCsv")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link href="/trades/new">
+                  <Plus className="h-4 w-4" />
+                  {t("trades.new")}
+                </Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       {/* Toolbar */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -494,24 +516,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
           </div>
 
           {/* Mobile list: Presisi Gambar 3 dari WhatsApp */}
-          <div className="space-y-3.5 p-3 lg:hidden">
-            {/* Top Sub-tabs TRADES vs JOURNALS */}
-            <div className="flex items-center gap-6 border-b border-white/[0.08] pb-2 px-1">
-              <button
-                type="button"
-                className="relative pb-2 font-mono text-xs font-bold uppercase tracking-wider text-white"
-              >
-                <span>TRADES</span>
-                <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]" />
-              </button>
-              <Link
-                href="/journal"
-                className="pb-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#71717a] hover:text-white transition"
-              >
-                <span>JOURNALS</span>
-              </Link>
-            </div>
-
+          <div className="space-y-3.5 lg:hidden">
             {paged.map((trade, idx) => {
               const account = accounts.find((a) => a.id === trade.account_id);
               const strategy = strategies.find((s) => s.id === trade.strategy_id);
@@ -520,9 +525,12 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
               return (
                 <React.Fragment key={trade.id}>
-                  {/* Sisipkan Journal Notes Card di urutan ke-2 persis seperti Gambar 3 */}
-                  {idx === 1 && (
-                    <div className="mobile-card p-4 space-y-2 border-white/[0.08]">
+                  {/* Sisipkan Journal Notes Card di urutan ke-2 jika user memiliki data jurnal */}
+                  {idx === 1 && latestJournal && (
+                    <Link
+                      href={`/journal`}
+                      className="mobile-card block p-4 space-y-2 border-white/[0.08] hover:border-white/20 transition-colors"
+                    >
                       <div className="flex items-center justify-between text-xs text-[#8e8e93]">
                         <div className="flex items-center gap-1.5 font-medium text-[#d4d4d8]">
                           <svg className="h-4 w-4 text-[#a1a1aa]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -531,25 +539,38 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                           </svg>
                           <span>Journal Notes</span>
                         </div>
-                        <span className="text-[10px] text-[#71717a]">Oct 20, 2026</span>
+                        <span className="text-[10px] text-[#71717a]">
+                          {new Date(latestJournal.journal_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
                       </div>
 
                       <h4 className="text-sm font-bold text-white tracking-tight leading-snug">
-                        Wait for the 15m breakout. High discipline today.
+                        {latestJournal.title || "Trading Reflection & Rules"}
                       </h4>
-                      <p className="text-xs text-[#a1a1aa] leading-relaxed">
-                        Slept well, wasn't anxious. Followed R:R exactly and scaled out near resistance.
-                      </p>
+                      {(latestJournal.lesson_learned || latestJournal.content) && (
+                        <p className="text-xs text-[#a1a1aa] leading-relaxed line-clamp-2">
+                          {latestJournal.lesson_learned || latestJournal.content}
+                        </p>
+                      )}
 
-                      <div className="flex items-center gap-2 pt-1">
-                        <span className="rounded-full bg-[#b2ff05] px-3 py-1 text-[11px] font-bold text-black shadow-[0_0_12px_rgba(178,255,5,0.4)]">
-                          Confident
-                        </span>
-                        <span className="rounded-full bg-[#134e4a]/60 border border-[#2dd4bf]/30 px-3 py-1 text-[11px] font-semibold text-[#2dd4bf]">
-                          Patient
-                        </span>
-                      </div>
-                    </div>
+                      {journalEmotions.length > 0 && (
+                        <div className="flex items-center gap-2 pt-1 flex-wrap">
+                          {journalEmotions.map((e) => (
+                            <span
+                              key={e.id}
+                              className="rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+                              style={{
+                                backgroundColor: `${e.color || "#b2ff05"}20`,
+                                color: e.color || "#b2ff05",
+                                border: `1px solid ${e.color || "#b2ff05"}40`,
+                              }}
+                            >
+                              {e.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </Link>
                   )}
 
                   <Link

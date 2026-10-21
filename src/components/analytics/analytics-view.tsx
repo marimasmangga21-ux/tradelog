@@ -200,7 +200,7 @@ export function AnalyticsView({
       {/* ============================================================ */}
       {/* MOBILE ANALYTICS VIEW (KONSISTEN 100% DENGAN DASHBOARD MOBILE)*/}
       {/* ============================================================ */}
-      <div className="block lg:hidden px-4 pt-1 pb-28 space-y-3.5 bg-[#09090b] text-[#f2f2f0] min-h-screen">
+      <div className="block lg:hidden space-y-3.5">
         {/* Range Pill Selector */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           {RANGE_OPTIONS.map((r) => (

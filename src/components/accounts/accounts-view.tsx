@@ -118,8 +118,22 @@ function MiniSparkline({ values, positive }: { values: number[]; positive: boole
 
 export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
   const { t } = useI18n();
-  const { accounts, trades, syncMt5, syncingMt5 } = useData();
+  const { accounts, trades, strategies, syncMt5, syncingMt5 } = useData();
   const router = useRouter();
+
+  const statsByStrategy = React.useMemo(() => {
+    const map = new Map<string, { winRate: number; profitFactor: number; totalTrades: number }>();
+    for (const strategy of strategies) {
+      const list = trades.filter((t) => t.strategy_id === strategy.id);
+      const wins = list.filter((t) => (t.pnl || 0) > 0).length;
+      const winRate = list.length > 0 ? (wins / list.length) * 100 : 0;
+      const grossProfit = list.filter((t) => (t.pnl || 0) > 0).reduce((s, t) => s + (t.pnl || 0), 0);
+      const grossLoss = Math.abs(list.filter((t) => (t.pnl || 0) < 0).reduce((s, t) => s + (t.pnl || 0), 0));
+      const pf = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 99 : 0;
+      map.set(strategy.id, { winRate, profitFactor: pf, totalTrades: list.length });
+    }
+    return map;
+  }, [strategies, trades]);
 
   async function handleManualSync() {
     toast.info("Sinkronisasi semua akun MT5...", { duration: 2500 });
@@ -266,11 +280,16 @@ export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
                 {/* Progress bar neon lime */}
                 <div className="space-y-1">
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                    <div className="h-full w-[88%] rounded-full bg-[#b2ff05] shadow-[0_0_10px_#b2ff05]" />
+                    <div
+                      className="h-full rounded-full bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]"
+                      style={{
+                        width: `${Math.min(100, Math.max(10, ((equity) / (acc.initial_balance || 10000)) * 100))}%`,
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-[#71717a]">
-                    <span>88% to target</span>
-                    <span>88% to target</span>
+                    <span>Initial: ${acc.initial_balance.toLocaleString()}</span>
+                    <span>Equity: ${equity.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
                   </div>
                 </div>
               </div>
@@ -278,68 +297,52 @@ export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
           })}
         </div>
 
-        {/* Section Strategies di Mobile (Gambar 2) */}
+        {/* Section Strategies di Mobile */}
         <div className="pt-3 space-y-2.5">
-          <h2 className="text-base font-bold text-white tracking-tight">Strategies</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-white tracking-tight">Strategies</h2>
+            <Link href="/strategies" className="text-xs text-[#b2ff05] font-semibold hover:underline">
+              View all →
+            </Link>
+          </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            {/* Strategy 1: ICT Silver Bullet */}
-            <div className="mobile-card p-3 space-y-2">
-              <div className="flex items-start justify-between gap-1">
-                <span className="text-xs font-bold text-white leading-tight">ICT Silver Bullet</span>
-                <span className="rounded bg-[#b2ff05] px-1.5 py-0.5 text-[9px] font-black text-black shrink-0 shadow-[0_0_8px_rgba(178,255,5,0.4)]">
-                  74% WR
-                </span>
-              </div>
-              <p className="text-[11px] text-[#a1a1aa]">
-                Profit Factor: <span className="font-mono font-bold text-[#b2ff05]">2.4</span>
-              </p>
-              <div className="flex items-center gap-1 text-[10px]">
-                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[#71717a]">↑ -</span>
-                <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-emerald-400 font-bold">+ -</span>
-                <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-red-400 font-bold">- -</span>
-              </div>
-            </div>
+            {strategies.slice(0, 4).map((strat) => {
+              const stat = statsByStrategy.get(strat.id);
+              const wr = stat?.winRate ?? 0;
+              const isHighWr = wr >= 50;
 
-            {/* Strategy 2: London Breakout */}
-            <div className="mobile-card p-3 space-y-2">
-              <div className="flex items-start justify-between gap-1">
-                <span className="text-xs font-bold text-white leading-tight">London Breakout</span>
-                <span className="rounded bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 text-[9px] font-black shrink-0">
-                  58% WR
-                </span>
-              </div>
-              <p className="text-[11px] text-[#a1a1aa]">
-                Profit Factor: <span className="font-mono font-bold text-white">1.8</span>
-              </p>
-              <p className="text-[10px] text-[#71717a]">48 Trades</p>
-            </div>
-
-            {/* Strategy 3: ORB Scalp */}
-            <div className="mobile-card p-3 space-y-2">
-              <div className="flex items-start justify-between gap-1">
-                <span className="text-xs font-bold text-white leading-tight">ORB Scalp</span>
-                <span className="rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 text-[9px] font-black shrink-0">
-                  65% WR
-                </span>
-              </div>
-              <p className="text-[11px] text-[#a1a1aa]">
-                Profit Factor: <span className="font-mono font-bold text-[#b2ff05]">2.1</span>
-              </p>
-            </div>
-
-            {/* Strategy 4: ORB Scalp 2 */}
-            <div className="mobile-card p-3 space-y-2">
-              <div className="flex items-start justify-between gap-1">
-                <span className="text-xs font-bold text-white leading-tight">ORB Scalp</span>
-                <span className="rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 text-[9px] font-black shrink-0">
-                  65% WR
-                </span>
-              </div>
-              <p className="text-[11px] text-[#a1a1aa]">
-                Profit Factor: <span className="font-mono font-bold text-[#b2ff05]">2.1</span>
-              </p>
-            </div>
+              return (
+                <Link
+                  key={strat.id}
+                  href={`/strategies`}
+                  className="mobile-card block p-3 space-y-2 hover:border-white/20 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-1">
+                    <span className="text-xs font-bold text-white leading-tight truncate">
+                      {strat.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded px-1.5 py-0.5 text-[9px] font-black shrink-0",
+                        isHighWr
+                          ? "bg-[#b2ff05] text-black shadow-[0_0_8px_rgba(178,255,5,0.4)]"
+                          : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      )}
+                    >
+                      {wr.toFixed(0)}% WR
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#a1a1aa]">
+                    Profit Factor:{" "}
+                    <span className="font-mono font-bold text-white">
+                      {(stat?.profitFactor ?? 0) > 0 ? (stat?.profitFactor ?? 0).toFixed(1) : "—"}
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-[#71717a]">{stat?.totalTrades ?? 0} Trades</p>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
