@@ -11,7 +11,9 @@ import {
   KeyRound,
   AlertCircle,
   CheckCircle2,
-  Sparkles,
+  X,
+  User,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +39,12 @@ export function LoginView() {
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [notice, setNotice] = React.useState("");
+
+  // Google Account Chooser Modal State
+  const [showGoogleModal, setShowGoogleModal] = React.useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = React.useState("");
+  const [customGoogleName, setCustomGoogleName] = React.useState("");
+  const [showCustomGoogleInput, setShowCustomGoogleInput] = React.useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -97,31 +105,26 @@ export function LoginView() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleSelectGoogleAccount = async (targetEmail: string, targetName: string) => {
     setBusy(true);
+    setShowGoogleModal(false);
     setMessage("");
     setNotice("");
 
     try {
-      const userEmail = email.trim() || "marimasmangga21@gmail.com";
-      const userName =
-        userEmail === "marimasmangga21@gmail.com"
-          ? "Evan Mita"
-          : userEmail.split("@")[0];
-
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`,
+          name: targetName,
+          email: targetEmail,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(targetEmail)}`,
         }),
       });
 
       const data = await res.json();
       if (data.ok) {
-        toast.success(`Selamat datang di Tradelog, ${userName}!`);
+        toast.success(`Selamat datang, ${targetName}!`);
         setTimeout(() => {
           window.location.href = redirectTarget;
         }, 300);
@@ -285,7 +288,7 @@ export function LoginView() {
             <button
               type="button"
               className="auth-google"
-              onClick={handleGoogleLogin}
+              onClick={() => setShowGoogleModal(true)}
               disabled={busy}
             >
               <GoogleIcon />
@@ -335,27 +338,125 @@ export function LoginView() {
           )}
         </div>
 
-        {/* Akses instan Owner */}
-        <div className="mt-4 pt-3.5 border-t border-white/[0.05] text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setEmail("marimasmangga21@gmail.com");
-              setPassword("trader123456");
-              handleGoogleLogin();
-            }}
-            disabled={busy}
-            className="text-[11px] text-[#71717a] hover:text-[#b2ff05] transition-colors inline-flex items-center gap-1.5"
-          >
-            <Sparkles className="h-3 w-3 text-[#b2ff05]" />
-            <span>Akses Cepat Owner (marimasmangga21@gmail.com)</span>
-          </button>
-        </div>
-
         <p className="auth-security-note">
           Data akun dan jurnal trading disimpan secara privat dan terenkripsi.
         </p>
       </section>
+
+      {/* Google Account Picker Modal */}
+      {showGoogleModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowGoogleModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-[#222228] bg-[#0e0e12] p-6 shadow-2xl text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setShowGoogleModal(false)}
+              className="absolute top-4 right-4 rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <GoogleIcon />
+              <div>
+                <h3 className="text-base font-bold text-white">Pilih Akun Google</h3>
+                <p className="text-xs text-zinc-400">untuk masuk ke Tradelog Precision Journal</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 mt-5">
+              {/* Account 1: Evan Mita */}
+              <button
+                type="button"
+                onClick={() => handleSelectGoogleAccount("marimasmangga21@gmail.com", "Evan Mita")}
+                disabled={busy}
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-[#16161c] hover:bg-[#1d1d24] hover:border-[#b2ff05]/40 transition-all text-left group"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#b2ff05]/20 to-emerald-500/20 border border-[#b2ff05]/30 flex items-center justify-center text-sm font-bold text-[#b2ff05] shrink-0">
+                    EM
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-200 group-hover:text-white truncate">
+                      Evan Mita
+                    </p>
+                    <p className="text-xs text-zinc-400 truncate">
+                      marimasmangga21@gmail.com
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-semibold text-[#b2ff05] bg-[#b2ff05]/10 px-2 py-0.5 rounded-full border border-[#b2ff05]/20 shrink-0">
+                  Utama
+                </span>
+              </button>
+
+              {/* Gunakan akun lain */}
+              {!showCustomGoogleInput ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomGoogleInput(true)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#121216] hover:bg-[#181820] text-zinc-300 hover:text-white transition-all text-left text-xs font-medium"
+                >
+                  <div className="w-10 h-10 rounded-full bg-zinc-800/60 border border-white/[0.06] flex items-center justify-center text-zinc-400 shrink-0">
+                    <Plus size={16} />
+                  </div>
+                  <span>Gunakan akun Google lain</span>
+                </button>
+              ) : (
+                <div className="p-3.5 rounded-xl border border-[#b2ff05]/30 bg-[#16161c] space-y-2.5">
+                  <p className="text-xs font-semibold text-zinc-200">Masukkan Akun Google Anda</p>
+                  <input
+                    type="text"
+                    value={customGoogleName}
+                    onChange={(e) => setCustomGoogleName(e.target.value)}
+                    placeholder="Nama lengkap"
+                    className="w-full text-xs bg-[#0a0a0d] border border-[#222228] rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-[#b2ff05]"
+                  />
+                  <input
+                    type="email"
+                    value={customGoogleEmail}
+                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                    placeholder="contoh@gmail.com"
+                    className="w-full text-xs bg-[#0a0a0d] border border-[#222228] rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-[#b2ff05]"
+                  />
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomGoogleInput(false)}
+                      className="flex-1 py-1.5 text-xs text-zinc-400 hover:text-white bg-zinc-800/60 rounded-lg"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!customGoogleEmail.trim()}
+                      onClick={() => {
+                        const email = customGoogleEmail.trim();
+                        const name = customGoogleName.trim() || email.split("@")[0];
+                        handleSelectGoogleAccount(email, name);
+                      }}
+                      className="flex-1 py-1.5 text-xs font-bold text-black bg-[#b2ff05] hover:bg-[#9fe600] rounded-lg disabled:opacity-50"
+                    >
+                      Lanjutkan
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[11px] text-zinc-500 text-center mt-5">
+              Tradelog hanya meminta akses identitas profil publik & email untuk otentikasi.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

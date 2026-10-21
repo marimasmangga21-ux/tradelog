@@ -148,38 +148,20 @@ export function SettingsView({
                 </div>
               </div>
 
-              {profile.email ? (
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-[#121215] px-2.5 py-1 text-[11px] font-medium text-[#b2ff05]">
-                    <GoogleIcon className="h-3 w-3" />
-                    <span>Terhubung Google</span>
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      await fetch("/api/auth/logout", { method: "POST" });
-                      window.location.href = "/login";
-                    }}
-                    className="h-8 gap-1 text-xs text-red-400 hover:text-red-400 hover:bg-red-500/10"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>Keluar</span>
-                  </Button>
-                </div>
-              ) : (
+              <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
+                    await fetch("/api/auth/logout", { method: "POST" });
                     window.location.href = "/login";
                   }}
-                  className="h-8 gap-1.5 text-xs border-[#b2ff05]/40 text-[#b2ff05] hover:bg-[#b2ff05]/10"
+                  className="h-8 gap-1 text-xs text-red-400 hover:text-red-400 hover:bg-red-500/10"
                 >
-                  <GoogleIcon className="h-3.5 w-3.5" />
-                  <span>Hubungkan Google</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Keluar</span>
                 </Button>
-              )}
+              </div>
             </div>
 
             <Separator />
