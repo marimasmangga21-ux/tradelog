@@ -284,7 +284,7 @@ export function LoginView() {
         </div>
 
         {/* Akses instan Owner */}
-        <div className="mt-4 pt-3 border-t border-white/[0.06] text-center">
+        <div className="mt-4 pt-3 border-t border-[#222228] text-center">
           <button
             type="button"
             onClick={() => {
