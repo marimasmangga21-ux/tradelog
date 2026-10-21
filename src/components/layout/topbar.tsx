@@ -196,11 +196,11 @@ export function Topbar() {
             variant="outline"
             size="sm"
             onClick={() => void logout()}
-            className="h-8 gap-1.5 border-[#222228] bg-[#121215] px-2.5 text-xs text-[#a0a0a0] transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400"
+            className="h-8 gap-1.5 border border-red-500/30 bg-red-500/10 px-2.5 text-xs text-red-400 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 transition-colors rounded-xl"
             title="Keluar dari akun Tradelog"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Keluar</span>
+            <span className="font-semibold">Keluar</span>
           </Button>
         </div>
       </div>

@@ -299,6 +299,19 @@ export function Sidebar() {
 
         <button
           type="button"
+          onClick={() => void logout()}
+          title="Keluar dari akun"
+          className={cn(
+            "flex items-center rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors",
+            collapsed ? "h-10 w-10 justify-center" : "gap-2.5 w-full px-2.5 py-2",
+          )}
+        >
+          <LogOut className="h-4 w-4 shrink-0 text-red-400" />
+          {!collapsed && <span>Keluar Akun</span>}
+        </button>
+
+        <button
+          type="button"
           onClick={toggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className={cn(
