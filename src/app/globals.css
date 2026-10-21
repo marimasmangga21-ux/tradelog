@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tradoxes exact design tokens */
+    --bg-primary: #000000;
+    --bg-elevated: #090909;
+    --bg-elevated-2: #121214;
+    --bg-overlay: rgba(0, 0, 0, 0.85);
+
+    --border-subtle: #1a1a1a;
+    --border-strong: #292929;
+    --border-glow: rgba(178, 255, 5, 0.35);
+
+    --text-primary: #f2f2f0;
+    --text-secondary: #a0a0a0;
+    --text-tertiary: #5c5c5c;
+
+    --accent-primary: #b2ff05;
+    --accent-dim: #8fcc04;
+    --accent-glow: rgba(178, 255, 5, 0.25);
+    --accent-surface: rgba(178, 255, 5, 0.08);
+
+    --success: #b2ff05;
+    --danger: #ff4d4d;
+    --danger-surface: rgba(255, 77, 77, 0.08);
+    --warning: #ffb020;
+    --warning-surface: rgba(255, 176, 32, 0.08);
+    --info: #4da3ff;
+
+    --session-asia: #6dd5de;
+    --session-asia-surface: rgba(109, 213, 222, 0.1);
+    --session-london: #b89aee;
+    --session-london-surface: rgba(184, 154, 238, 0.1);
+    --session-new-york: #ee8dae;
+    --session-new-york-surface: rgba(238, 141, 174, 0.1);
+
+    /* Shadcn bridge */
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-primary);
+    --card-elevated: var(--bg-elevated-2);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+
+    --primary: var(--accent-primary);
+    --primary-foreground: #000000;
+    --secondary: var(--bg-elevated-2);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-elevated-2);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--bg-elevated-2);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--danger);
+    --destructive-foreground: #ffffff;
+    --border: var(--border-subtle);
+    --input: var(--border-subtle);
+    --ring: var(--accent-primary);
+
+    --profit: var(--accent-primary);
+    --profit-foreground: #000000;
+    --loss: var(--danger);
+    --loss-foreground: #ffffff;
+
+    --radius: 0.5rem; /* 8px in Tradoxes */
+  }
+
+  .dark {
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-primary);
+    --card-elevated: var(--bg-elevated-2);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--accent-primary);
+    --primary-foreground: #000000;
+    --secondary: var(--bg-elevated-2);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-elevated-2);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--bg-elevated-2);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--danger);
+    --destructive-foreground: #ffffff;
+    --border: var(--border-subtle);
+    --input: var(--border-subtle);
+    --ring: var(--accent-primary);
+    --profit: var(--accent-primary);
+    --loss: var(--danger);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  ::selection {
+    background-color: rgba(178, 255, 5, 0.25);
+    color: #ffffff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #222226;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333338;
+  }
+
+  /* Hilangkan scrollbar navigasi saat scroll di HP/mobile */
+  @media (max-width: 1024px) {
+    html,
+    body,
+    * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    *::-webkit-scrollbar,
+    ::-webkit-scrollbar {
+      display: none !important;
+      width: 0px !important;
+      height: 0px !important;
+    }
+  }
+
+  @media (pointer: coarse) {
+    html,
+    body,
+    * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    *::-webkit-scrollbar,
+    ::-webkit-scrollbar {
+      display: none !important;
+      width: 0px !important;
+      height: 0px !important;
+    }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .tradoxes-card {
+    background: linear-gradient(180deg, rgba(20, 20, 24, 0.75) 0%, rgba(12, 12, 14, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .tradoxes-card-hover {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tradoxes-card-hover:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .tradoxes-glow {
+    box-shadow: 0 0 25px -4px rgba(178, 255, 5, 0.25);
+  }
+
+  .glass-dock {
+    background: rgba(9, 9, 11, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .mobile-card {
+    background: linear-gradient(180deg, #18181c 0%, #121215 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .neon-ring {
+    filter: drop-shadow(0 0 10px rgba(178, 255, 5, 0.5));
+  }
+}
