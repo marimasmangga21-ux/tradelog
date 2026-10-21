@@ -405,6 +405,7 @@ export function MobileNav() {
 
 export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
+  const { logout } = useData();
   // Hilangkan Mobile Studio dari menu di HP, tambahkan Settings
   const mobileNavItems = [
     ...NAV_ITEMS.filter((item) => item.href !== "/preview"),
@@ -433,6 +434,20 @@ export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
           </Link>
         );
       })}
+
+      <div className="pt-2 border-t border-white/[0.06] mt-2">
+        <button
+          type="button"
+          onClick={() => {
+            onSelect?.();
+            void logout();
+          }}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Keluar Akun</span>
+        </button>
+      </div>
     </div>
   );
 }

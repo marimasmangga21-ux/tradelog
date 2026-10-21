@@ -89,8 +89,8 @@ export function LoginView() {
           description: `Berhasil login dengan ${account.email}`,
         });
         setModalOpen(false);
-        router.push("/dashboard");
-        router.refresh();
+        const redirect = searchParams?.get("redirect") || "/dashboard";
+        window.location.href = redirect;
       } else {
         toast.error("Login gagal", { description: data.error });
         setLoading(false);
@@ -211,29 +211,52 @@ export function LoginView() {
               {/* Official Google Button (jika origin diizinkan di Cloud Console) */}
               <div ref={googleBtnRef} className="w-full flex justify-center empty:hidden" />
 
-              {/* Direct Instant Google Login Button */}
+              {/* Quick 1-Click Profile Login */}
+              <button
+                type="button"
+                onClick={() => executeGoogleLogin(DEMO_GOOGLE_ACCOUNTS[0])}
+                disabled={loading}
+                className={cn(
+                  "group relative flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#121215] p-3.5 transition-all duration-200 hover:border-[#b2ff05]/50 hover:bg-[#18181e] active:scale-[0.98] shadow-lg",
+                  loading && "opacity-60 cursor-not-allowed"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={DEMO_GOOGLE_ACCOUNTS[0].avatar_url}
+                    alt={DEMO_GOOGLE_ACCOUNTS[0].name}
+                    className="h-10 w-10 rounded-full border border-white/10 bg-[#27272a]"
+                  />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-white">{DEMO_GOOGLE_ACCOUNTS[0].name}</p>
+                      <span className="rounded bg-[#b2ff05]/20 text-[#b2ff05] px-1.5 py-0.5 text-[9px] font-bold">
+                        Masuk Cepat
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8e8e93]">{DEMO_GOOGLE_ACCOUNTS[0].email}</p>
+                  </div>
+                </div>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-[#b2ff05]" />
+                ) : (
+                  <ArrowRight className="h-4 w-4 text-[#71717a] group-hover:text-[#b2ff05] group-hover:translate-x-0.5 transition-all" />
+                )}
+              </button>
+
+              {/* Direct Instant Google Login Button / Other Account */}
               <button
                 type="button"
                 onClick={() => setModalOpen(true)}
                 disabled={loading}
                 className={cn(
-                  "group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-[#0e0e12] px-4 py-3.5 text-sm font-medium text-white transition-all duration-200 hover:border-[#b2ff05]/40 hover:bg-[#141418] active:scale-[0.98] shadow-lg",
+                  "group relative flex w-full items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-[#0e0e12] px-4 py-3 text-xs font-semibold text-white transition-all duration-200 hover:border-white/30 hover:bg-[#141418] active:scale-[0.98]",
                   loading && "opacity-60 cursor-not-allowed"
                 )}
               >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-[#b2ff05]" />
-                ) : (
-                  <GoogleIcon className="h-4 w-4" />
-                )}
-                <span>Lanjutkan dengan Akun Google</span>
+                <GoogleIcon className="h-3.5 w-3.5" />
+                <span>Gunakan Akun Google Lain</span>
               </button>
-
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-3 text-left">
-                <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                  <span className="font-semibold text-amber-300">Catatan Google:</span> Client ID kalkulator belum mendaftarkan origin <code className="font-mono bg-black/40 px-1 py-0.5 rounded text-white">http://localhost:3000</code> di Google Cloud Console. Gunakan tombol di atas untuk login langsung dengan profil akun Google Anda.
-                </p>
-              </div>
             </div>
 
             {/* Feature Highlights */}

@@ -3,9 +3,32 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const sessionCookie = request.cookies.get("tradelog_session")?.value;
 
-  // Jika user membuka halaman login atau root, langsung arahkan ke dashboard
-  if (pathname === "/" || pathname === "/login") {
+  // Lewatkan API dan asset statis
+  if (
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/_next/") ||
+    pathname.includes(".") ||
+    pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
+  }
+
+  // User belum login
+  if (!sessionCookie) {
+    if (pathname === "/login" || pathname.startsWith("/auth/callback")) {
+      return NextResponse.next();
+    }
+    const loginUrl = new URL("/login", request.url);
+    if (pathname !== "/") {
+      loginUrl.searchParams.set("redirect", pathname);
+    }
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // User sudah login
+  if (pathname === "/login" || pathname === "/") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -13,5 +36,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
