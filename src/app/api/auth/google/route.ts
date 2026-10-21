@@ -4,8 +4,10 @@ import { supabaseUrl } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const host = request.headers.get("x-forwarded-host") || url.host;
+  const proto = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", "") || "https");
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || `${url.protocol}//${url.host}`;
+    process.env.NEXT_PUBLIC_APP_URL || `${proto}://${host}`;
   const redirectUri = `${appUrl}/auth/callback`;
 
   // Redirect langsung ke Google OAuth via Supabase provider

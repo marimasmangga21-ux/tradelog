@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 declare global {
   interface Window {
@@ -121,6 +122,30 @@ export function LoginView() {
 
   const [googleBlocked, setGoogleBlocked] = React.useState(false);
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUri,
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
+        },
+      });
+
+      if (error) {
+        // Fallback langsung ke backend route
+        window.location.href = "/api/auth/google";
+      }
+    } catch {
+      window.location.href = "/api/auth/google";
+    }
+  };
+
   const initGoogleSdk = () => {
     try {
       if (typeof window !== "undefined" && window.google?.accounts?.id) {
@@ -211,52 +236,36 @@ export function LoginView() {
               {/* Official Google Button (jika origin diizinkan di Cloud Console) */}
               <div ref={googleBtnRef} className="w-full flex justify-center empty:hidden" />
 
-              {/* Quick 1-Click Profile Login */}
+              {/* Real Google OAuth Login Button */}
               <button
                 type="button"
-                onClick={() => executeGoogleLogin(DEMO_GOOGLE_ACCOUNTS[0])}
+                onClick={handleGoogleSignIn}
                 disabled={loading}
                 className={cn(
-                  "group relative flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#121215] p-3.5 transition-all duration-200 hover:border-[#b2ff05]/50 hover:bg-[#18181e] active:scale-[0.98] shadow-lg",
-                  loading && "opacity-60 cursor-not-allowed"
+                  "group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-black transition-all duration-200 hover:bg-[#b2ff05] hover:shadow-[0_0_24px_rgba(178,255,5,0.4)] active:scale-[0.98] shadow-lg",
+                  loading && "opacity-70 cursor-not-allowed"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={DEMO_GOOGLE_ACCOUNTS[0].avatar_url}
-                    alt={DEMO_GOOGLE_ACCOUNTS[0].name}
-                    className="h-10 w-10 rounded-full border border-white/10 bg-[#27272a]"
-                  />
-                  <div className="text-left">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-bold text-white">{DEMO_GOOGLE_ACCOUNTS[0].name}</p>
-                      <span className="rounded bg-[#b2ff05]/20 text-[#b2ff05] px-1.5 py-0.5 text-[9px] font-bold">
-                        Masuk Cepat
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#8e8e93]">{DEMO_GOOGLE_ACCOUNTS[0].email}</p>
-                  </div>
-                </div>
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-[#b2ff05]" />
+                  <Loader2 className="h-5 w-5 animate-spin text-black" />
                 ) : (
-                  <ArrowRight className="h-4 w-4 text-[#71717a] group-hover:text-[#b2ff05] group-hover:translate-x-0.5 transition-all" />
+                  <GoogleIcon className="h-5 w-5" />
                 )}
+                <span>Masuk dengan Google</span>
               </button>
 
-              {/* Direct Instant Google Login Button / Other Account */}
-              <button
-                type="button"
-                onClick={() => setModalOpen(true)}
-                disabled={loading}
-                className={cn(
-                  "group relative flex w-full items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-[#0e0e12] px-4 py-3 text-xs font-semibold text-white transition-all duration-200 hover:border-white/30 hover:bg-[#141418] active:scale-[0.98]",
-                  loading && "opacity-60 cursor-not-allowed"
-                )}
-              >
-                <GoogleIcon className="h-3.5 w-3.5" />
-                <span>Gunakan Akun Google Lain</span>
-              </button>
+              {/* Opsi Cepat / Masuk Demo */}
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  disabled={loading}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#b2ff05] transition-colors py-1 px-3 rounded-lg hover:bg-white/[0.04]"
+                >
+                  <KeyRound className="h-3.5 w-3.5" />
+                  <span>Opsi Akun Demo / Manual</span>
+                </button>
+              </div>
             </div>
 
             {/* Feature Highlights */}

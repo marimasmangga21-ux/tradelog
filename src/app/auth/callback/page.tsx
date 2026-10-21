@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
             toast.success(`Selamat datang, ${name}!`, {
               description: `Berhasil terhubung dengan Google (${email})`,
             });
-            router.replace("/dashboard");
+            window.location.href = "/dashboard";
             return;
           }
         }
@@ -75,7 +75,7 @@ export default function AuthCallbackPage() {
               toast.success(`Selamat datang, ${name}!`, {
                 description: `Berhasil terhubung dengan Google (${email})`,
               });
-              router.replace("/dashboard");
+              window.location.href = "/dashboard";
             }
           }
         );
@@ -97,11 +97,11 @@ export default function AuthCallbackPage() {
                     avatar_url: meta.avatar_url || meta.picture,
                   }),
                 }).then(() => {
-                  router.replace("/dashboard");
+                  window.location.href = "/dashboard";
                 });
               } else {
                 toast.error("Otentikasi Google tidak selesai atau dibatalkan.");
-                router.replace("/login");
+                window.location.href = "/login";
               }
             });
           }
