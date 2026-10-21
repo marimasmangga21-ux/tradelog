@@ -23,3 +23,5 @@ shots/
 
 # Local Netlify folder
 .netlify
+
+.vercel
