@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
+const GOOGLE_CLIENT_ID = "960568853150-ii7c2r206m475eeraihh76g08qcdc23k.apps.googleusercontent.com";
+
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
@@ -37,6 +39,19 @@ export function LoginView() {
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [notice, setNotice] = React.useState("");
+
+  // Load Google Identity Services SDK di client
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.getElementById("google-gsi-client")) return;
+
+    const script = document.createElement("script");
+    script.id = "google-gsi-client";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -97,14 +112,79 @@ export function LoginView() {
     }
   };
 
+  const syncGoogleUserToTradelog = async (profile: { name?: string; email: string; picture?: string }) => {
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: profile.name || profile.email.split("@")[0],
+        email: profile.email,
+        avatar_url: profile.picture || "",
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Gagal menyimpan sesi akun Google.");
+    }
+
+    setNotice(`Selamat datang, ${data.user?.name || profile.email}!`);
+    toast.success(`Berhasil masuk sebagai ${data.user?.name || profile.email}`);
+    setTimeout(() => {
+      window.location.href = redirectTarget;
+    }, 300);
+  };
+
   const handleGoogleLogin = async () => {
     setBusy(true);
     setMessage("");
     setNotice("");
 
+    // 1. Coba gunakan Google Identity Services Token Client (langsung muncul dialog Pilih Akun resmi Google)
+    if (typeof window !== "undefined" && (window as any).google?.accounts?.oauth2) {
+      try {
+        const client = (window as any).google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "email profile openid",
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse.error) {
+              setBusy(false);
+              if (tokenResponse.error !== "popup_closed_by_user") {
+                setMessage("Gagal menghubungkan akun Google. Silakan coba lagi.");
+              }
+              return;
+            }
+
+            if (tokenResponse.access_token) {
+              try {
+                const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const userProfile = await userInfoRes.json();
+                if (userProfile?.email) {
+                  await syncGoogleUserToTradelog(userProfile);
+                  return;
+                }
+                throw new Error("Email Google tidak ditemukan.");
+              } catch (err: any) {
+                setMessage(err.message || "Gagal memproses data akun Google.");
+                setBusy(false);
+              }
+            }
+          },
+        });
+
+        // Paksa prompt select_account agar SELALU muncul popup pilih akun
+        client.requestAccessToken({ prompt: "select_account" });
+        return;
+      } catch (err) {
+        console.warn("Google GIS error, fallback ke Supabase OAuth:", err);
+      }
+    }
+
+    // 2. Fallback jika GIS belum siap: Supabase OAuth
     try {
       const origin = typeof window !== "undefined" ? window.location.origin : "https://tradelogjournal-app.vercel.app";
-      // Popup akun Google resmi via Supabase dengan query prompt select_account (seperti di Calculator)
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -115,10 +195,7 @@ export function LoginView() {
         },
       });
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
       }
