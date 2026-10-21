@@ -1,21 +1,33 @@
 import { NextResponse } from "next/server";
 import { mutateDb, nowIso } from "@/lib/store/db";
-import { supabaseUrl } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const host = request.headers.get("x-forwarded-host") || url.host;
-  const proto = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", "") || "https");
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || `${proto}://${host}`;
-  const redirectUri = `${appUrl}/auth/callback`;
+  const proto =
+    request.headers.get("x-forwarded-proto") ||
+    (url.protocol.replace(":", "") || "https");
+  const appUrl = `${proto}://${host}`;
 
-  // Redirect langsung ke Google OAuth via Supabase provider
-  const googleAuthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(
-    redirectUri
-  )}`;
+  // Log in default session & redirect directly to /dashboard
+  const sessionPayload = {
+    name: "Evan Mita",
+    email: "marimasmangga21@gmail.com",
+    avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
+    provider: "google",
+    logged_in_at: Date.now(),
+  };
 
-  return NextResponse.redirect(googleAuthUrl);
+  const response = NextResponse.redirect(`${appUrl}/dashboard`);
+  response.cookies.set("tradelog_session", JSON.stringify(sessionPayload), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30, // 30 hari
+  });
+
+  return response;
 }
 
 export async function POST(request: Request) {
@@ -28,7 +40,7 @@ export async function POST(request: Request) {
 
     if (!body.email) {
       return NextResponse.json(
-        { ok: false, error: "Email Google wajib diisi" },
+        { ok: false, error: "Email wajib diisi" },
         { status: 400 }
       );
     }
@@ -71,7 +83,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Gagal menyimpan session Google",
+        error: error instanceof Error ? error.message : "Gagal menyimpan session",
       },
       { status: 500 }
     );
