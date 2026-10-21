@@ -14,7 +14,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 # Data jurnal pribadi — jangan ikut di-commit
-data/
+/data/
+data/tradelog.json*
+data/screenshots/
+data/uploads/
 # Local screenshot artifacts from scripts/shot*.js
 shots/
 
