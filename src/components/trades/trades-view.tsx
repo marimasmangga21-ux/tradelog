@@ -197,23 +197,23 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="h-9 gap-1.5 border-[#222228] bg-[#0c0c0e] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white rounded-xl">
                     <Download className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{t("trades.exportCsv")}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuContent align="end" className="w-60 border-[#222228] bg-[#0e0e12] text-white">
                   <DropdownMenuLabel>{t("trades.exportCsv")}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => { window.location.href = "/api/export/trades"; }}>
+                  <DropdownMenuSeparator className="bg-[#222228]" />
+                  <DropdownMenuItem onClick={() => { window.location.href = "/api/export/trades"; }} className="cursor-pointer">
                     <Download className="h-4 w-4" />
                     {t("trades.exportCsv")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button asChild size="sm" className="gap-1.5">
+              <Button asChild size="sm" className="h-9 gap-1.5 bg-[#b2ff05] text-black font-bold hover:bg-[#9fe000] rounded-xl shadow-[0_0_15px_rgba(178,255,5,0.25)]">
                 <Link href="/trades/new">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 stroke-[2.5]" />
                   {t("trades.new")}
                 </Link>
               </Button>
@@ -225,17 +225,17 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
       {/* Toolbar */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 sm:max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#71717a]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`${t("common.search")}…`}
-            className="h-9 pl-8 text-xs"
+            className="h-9 rounded-xl border-[#222228] bg-[#0c0c0e] pl-8 text-xs text-white placeholder-[#71717a] focus:border-[#b2ff05]"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#71717a] hover:text-white"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -244,7 +244,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
         <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-xl border-[#222228] bg-[#0c0c0e] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white">
               <SlidersHorizontal className="h-3.5 w-3.5" />
               {t("common.filter")}
               {activeFilterCount > 0 && (
@@ -254,24 +254,24 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-80 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">{t("common.filter")}</p>
+          <PopoverContent align="start" className="w-80 space-y-3 border-[#222228] bg-[#0c0c0e] text-white">
+            <div className="flex items-center justify-between border-b border-[#222228] pb-2">
+              <p className="text-sm font-semibold">{t("common.filter")}</p>
               <button
                 onClick={resetFilters}
-                className="text-[11px] text-muted-foreground hover:text-foreground"
+                className="text-[11px] text-[#71717a] hover:text-[#b2ff05]"
               >
                 {t("common.reset")}
               </button>
             </div>
 
             <div className="space-y-1.5">
-              <Label>{t("trades.result")}</Label>
+              <Label className="text-xs text-[#a1a1aa]">{t("trades.result")}</Label>
               <Select value={result} onValueChange={(v) => setResult(v as TradeResult | "all")}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-9 rounded-xl border-[#222228] bg-[#121215] text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-[#222228] bg-[#0e0e12] text-white">
                   <SelectItem value="all">{t("trades.filterResult")}</SelectItem>
                   <SelectItem value="win">{t("trades.win")}</SelectItem>
                   <SelectItem value="loss">{t("trades.loss")}</SelectItem>
@@ -282,12 +282,12 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
             </div>
 
             <div className="space-y-1.5">
-              <Label>{t("trades.strategy")}</Label>
+              <Label className="text-xs text-[#a1a1aa]">{t("trades.strategy")}</Label>
               <Select value={strategyId} onValueChange={setStrategyId}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-9 rounded-xl border-[#222228] bg-[#121215] text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-[#222228] bg-[#0e0e12] text-white">
                   <SelectItem value="all">{t("trades.filterStrategy")}</SelectItem>
                   <SelectItem value="none">{t("common.none")}</SelectItem>
                   {strategies.map((s) => (
@@ -300,12 +300,12 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
             </div>
 
             <div className="space-y-1.5">
-              <Label>{t("trades.instrument")}</Label>
+              <Label className="text-xs text-[#a1a1aa]">{t("trades.instrument")}</Label>
               <Select value={instrument} onValueChange={setInstrument}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-9 rounded-xl border-[#222228] bg-[#121215] text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-[#222228] bg-[#0e0e12] text-white">
                   <SelectItem value="all">{t("trades.filterPair")}</SelectItem>
                   {instruments.map((i) => (
                     <SelectItem key={i} value={i}>
@@ -318,12 +318,12 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
-                <Label>{t("trades.filterFrom")}</Label>
-                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-9 text-xs" />
+                <Label className="text-xs text-[#a1a1aa]">{t("trades.filterFrom")}</Label>
+                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-9 rounded-xl border-[#222228] bg-[#121215] text-xs" />
               </div>
               <div className="space-y-1.5">
-                <Label>{t("trades.filterTo")}</Label>
-                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-9 text-xs" />
+                <Label className="text-xs text-[#a1a1aa]">{t("trades.filterTo")}</Label>
+                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-9 rounded-xl border-[#222228] bg-[#121215] text-xs" />
               </div>
             </div>
           </PopoverContent>
@@ -331,18 +331,19 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-xl border-[#222228] bg-[#0c0c0e] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white">
               <ArrowDownUp className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{sortLabels[sort]}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>{t("common.filter")}</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-48 border-[#222228] bg-[#0e0e12] text-white">
+            <DropdownMenuLabel className="text-xs text-[#8e8e93]">{t("common.filter")}</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-[#222228]" />
             {(Object.keys(sortLabels) as SortKey[]).map((key) => (
               <DropdownMenuItem
                 key={key}
                 onClick={() => setSort(key)}
-                className={cn(sort === key && "bg-accent/60")}
+                className={cn("cursor-pointer text-xs", sort === key && "bg-[#b2ff05]/15 text-[#b2ff05] font-semibold")}
               >
                 {sortLabels[key]}
               </DropdownMenuItem>
@@ -351,7 +352,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
         </DropdownMenu>
 
         {activeFilterCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-9 gap-1 text-xs">
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-9 gap-1 text-xs text-[#71717a] hover:text-[#b2ff05]">
             <X className="h-3 w-3" />
             {t("common.reset")}
           </Button>
@@ -359,24 +360,24 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
       </div>
 
       {/* Ringkasan hasil filter */}
-      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border/70 bg-card/40 px-3 py-2 text-[11px]">
-        <span className="text-muted-foreground">
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-[#222228] bg-[#0c0c0e]/80 px-3.5 py-2 text-[11px] text-[#8e8e93]">
+        <span>
           {t("trades.showing", { n: filtered.length, total: trades.length })}
         </span>
-        <span className="text-muted-foreground">
+        <span>
           {t("analytics.netPnl")}:{" "}
-          <span className={cn("tabular font-medium", pnlColor(totals.net))}>
+          <span className={cn("tabular font-mono font-bold", pnlColor(totals.net))}>
             {formatSignedCurrency(totals.net, currency)}
           </span>
         </span>
-        <span className="text-muted-foreground">
+        <span>
           {t("dashboard.winRate")}:{" "}
-          <span className="tabular font-medium text-foreground">
+          <span className="tabular font-mono font-bold text-white">
             {totals.total > 0 ? ((totals.wins / totals.total) * 100).toFixed(1) : "0.0"}%
           </span>
         </span>
         {activeAccount && (
-          <Badge variant="outline" className="gap-1 text-[10px]">
+          <Badge variant="outline" className="gap-1 border-[#222228] bg-[#121215] text-[10px]">
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: activeAccount.color }} />
             {activeAccount.name}
           </Badge>
@@ -411,26 +412,26 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
           />
         )
       ) : (
-        <div className="tradoxes-card overflow-hidden rounded-2xl">
+        <div className="tradoxes-card overflow-hidden rounded-2xl border border-white/[0.06]">
           {/* Desktop table */}
           <div className="hidden max-h-[70vh] overflow-auto lg:block">
             <table className="w-full">
-              <thead className="sticky top-0 z-10 border-b border-border/70 bg-card/95 backdrop-blur-md">
-                <tr className="text-left text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-3 font-medium">{t("trades.date")}</th>
-                  <th className="px-3 py-3 font-medium">{t("trades.instrument")}</th>
-                  <th className="px-3 py-3 font-medium">{t("trades.session")}</th>
-                  <th className="px-3 py-3 font-medium">{t("trades.account")}</th>
-                  <th className="px-3 py-3 font-medium">{t("trades.strategy")}</th>
-                  <th className="px-3 py-3 text-right font-medium">{t("trades.entry")}</th>
-                  <th className="px-3 py-3 text-right font-medium">{t("trades.exit")}</th>
-                  <th className="px-3 py-3 text-right font-medium">{t("trades.rr")}</th>
-                  <th className="px-3 py-3 text-right font-medium">{t("trades.pnl")}</th>
-                  <th className="px-3 py-3 text-center font-medium">{t("trades.result")}</th>
+              <thead className="sticky top-0 z-10 border-b border-white/[0.04] bg-[#09090b]/95 backdrop-blur-md">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-[#8e8e93]">
+                  <th className="px-4 py-3 font-semibold">{t("trades.date")}</th>
+                  <th className="px-3 py-3 font-semibold">{t("trades.instrument")}</th>
+                  <th className="px-3 py-3 font-semibold">{t("trades.session")}</th>
+                  <th className="px-3 py-3 font-semibold">{t("trades.account")}</th>
+                  <th className="px-3 py-3 font-semibold">{t("trades.strategy")}</th>
+                  <th className="px-3 py-3 text-right font-semibold">{t("trades.entry")}</th>
+                  <th className="px-3 py-3 text-right font-semibold">{t("trades.exit")}</th>
+                  <th className="px-3 py-3 text-right font-semibold">{t("trades.rr")}</th>
+                  <th className="px-3 py-3 text-right font-semibold">{t("trades.pnl")}</th>
+                  <th className="px-3 py-3 text-center font-semibold">{t("trades.result")}</th>
                   <th className="w-8" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/50">
+              <tbody className="divide-y divide-white/[0.04]">
                 {paged.map((trade) => {
                   const account = accounts.find((a) => a.id === trade.account_id);
                   const strategy = strategies.find((s) => s.id === trade.strategy_id);
@@ -446,16 +447,16 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                   return (
                     <tr
                       key={trade.id}
-                      className="group h-12 cursor-pointer transition-colors hover:bg-accent/40"
+                      className="group h-12 cursor-pointer transition-colors hover:bg-white/[0.03]"
                       onClick={() => router.push(`/trades/${trade.id}`)}
                     >
-                      <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
+                      <td className="whitespace-nowrap px-4 py-2 text-xs text-[#a0a0a0]">
                         {new Date(trade.traded_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
                           day: "2-digit",
                           month: "short",
                           year: "2-digit",
                         })}
-                        <span className="ml-1.5 text-[10px] opacity-60">
+                        <span className="ml-1.5 text-[10px] text-[#71717a]">
                           {new Date(trade.traded_at).toLocaleTimeString(locale === "id" ? "id-ID" : "en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -471,13 +472,13 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                       <td className="px-3 py-2">
                         <span
                           title={`${sessionLabel} · ${sessionRangeLabel(trade.session)}`}
-                          className="rounded-md border border-border/70 bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                          className="rounded-md border border-[#222228] bg-[#0c0c0e] px-1.5 py-0.5 text-[10px] font-medium text-[#a1a1aa]"
                         >
                           {sessionLabel}
                         </span>
                       </td>
                       <td className="px-3 py-2">
-                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5 text-xs text-[#d4d4d8]">
                           <span
                             className="h-1.5 w-1.5 rounded-full shrink-0"
                             style={{ backgroundColor: account?.color ?? "#64748b" }}
@@ -485,20 +486,20 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                           <span className="max-w-[110px] truncate">{account?.name ?? "—"}</span>
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                      <td className="px-3 py-2 text-xs text-[#a1a1aa]">
                         <span className="max-w-[120px] truncate">{strategy?.name ?? "—"}</span>
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-muted-foreground">
+                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
                         {trade.entry_price ?? "—"}
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-muted-foreground">
+                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
                         {trade.exit_price ?? "—"}
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-muted-foreground">
+                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
                         {formatR(trade.r_multiple)}
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <span className={cn("tabular font-mono text-xs font-semibold", pnlColor(trade.pnl))}>
+                        <span className={cn("tabular font-mono text-xs font-bold", pnlColor(trade.pnl))}>
                           {trade.status === "open" ? "—" : hideAmounts ? formatR(trade.r_multiple) : formatSignedCurrency(trade.pnl, cur)}
                         </span>
                       </td>
@@ -506,7 +507,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                         <ResultBadge result={trade.result} showIcon={false} />
                       </td>
                       <td className="pr-3">
-                        <ChevronDown className="h-3.5 w-3.5 -rotate-90 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
+                        <ChevronDown className="h-3.5 w-3.5 -rotate-90 text-[#71717a] opacity-0 transition group-hover:opacity-100 group-hover:text-[#b2ff05]" />
                       </td>
                     </tr>
                   );

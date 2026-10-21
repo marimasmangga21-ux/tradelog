@@ -215,13 +215,13 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1">
               <Select value={emotionFilter} onValueChange={setEmotionFilter}>
-                <SelectTrigger className="h-9 w-full max-w-[180px] text-xs">
+                <SelectTrigger className="h-9 w-full max-w-[180px] text-xs border-[#222228] bg-[#0c0c0e] text-[#d4d4d8] hover:border-[#b2ff05]/40 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-[#222228] bg-[#0e0e12] text-white">
                   <SelectItem value="all">{t("journal.allEmotions")}</SelectItem>
                   {emotions.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
+                    <SelectItem key={e.id} value={e.id} className="cursor-pointer">
                       <span className="flex items-center gap-2">
                         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: e.color }} />
                         {e.name}
@@ -351,22 +351,43 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                       </div>
                     )}
 
-                    {journal.lesson_learned && (
-                      <p className="mt-2.5 text-xs leading-relaxed text-[#a1a1aa]">
-                        <span className="font-semibold text-[#b2ff05]">{t("journal.lesson")}: </span>
-                        {journal.lesson_learned}
-                      </p>
+                    {/* Trading Evaluation Blocks (Pelajaran & Kesalahan) */}
+                    {(journal.lesson_learned || journal.mistakes) && (
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {journal.lesson_learned && (
+                          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] p-3 transition-colors hover:border-emerald-500/40">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" />
+                              <span>Key Takeaway & Setup</span>
+                            </div>
+                            <p className="mt-1.5 text-xs leading-relaxed text-[#d4d4d8]">
+                              {journal.lesson_learned}
+                            </p>
+                          </div>
+                        )}
+                        {journal.mistakes && (
+                          <div className="rounded-xl border border-red-500/25 bg-red-500/[0.04] p-3 transition-colors hover:border-red-500/40">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_6px_#ef4444]" />
+                              <span>Evaluasi & Leak Detected</span>
+                            </div>
+                            <p className="mt-1.5 text-xs leading-relaxed text-[#d4d4d8]">
+                              {journal.mistakes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     )}
-                    {journal.mistakes && (
-                      <p className="mt-1 text-xs leading-relaxed text-[#a1a1aa]">
-                        <span className="font-semibold text-red-400">{t("journal.mistakes")}: </span>
-                        {journal.mistakes}
-                      </p>
-                    )}
+
                     {journal.content && (
-                      <p className="mt-2 border-t border-[#222228] pt-2 text-xs leading-relaxed text-[#8e8e93]">
-                        {journal.content}
-                      </p>
+                      <div className="mt-2.5 rounded-xl border border-[#222228] bg-[#0c0c0e]/80 p-3">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#71717a] block mb-1">
+                          Catatan Psikologi / Sesi:
+                        </span>
+                        <p className="text-xs leading-relaxed text-[#a1a1aa]">
+                          {journal.content}
+                        </p>
+                      </div>
                     )}
                   </div>
                 );

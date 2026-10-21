@@ -90,14 +90,17 @@ function normalize(raw: unknown): Database {
   const base = seed();
   if (!raw || typeof raw !== "object") return base;
   const obj = raw as Partial<Database>;
+  const hasOldAiSlop = Array.isArray(obj.journals) && obj.journals.some((j: any) => typeof j?.lesson_learned === "string" && j.lesson_learned.includes("Menunggu sweep"));
+  const shouldRefreshJournals = obj.is_sample || hasOldAiSlop;
+
   return {
-    version: obj.version ?? 1,
+    version: obj.version ?? 2,
     is_sample: obj.is_sample ?? false,
     profile: { ...base.profile, ...(obj.profile ?? {}) },
     accounts: Array.isArray(obj.accounts) ? obj.accounts : [],
     strategies: Array.isArray(obj.strategies) ? obj.strategies : [],
     trades: Array.isArray(obj.trades) ? obj.trades : [],
-    journals: Array.isArray(obj.journals) ? obj.journals : [],
+    journals: shouldRefreshJournals ? demoJournals.map((j) => ({ ...j })) : (Array.isArray(obj.journals) ? obj.journals : []),
     emotions: Array.isArray(obj.emotions) ? obj.emotions : base.emotions,
     screenshots: Array.isArray(obj.screenshots) ? obj.screenshots : [],
   };

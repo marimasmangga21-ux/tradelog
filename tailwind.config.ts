@@ -30,9 +30,9 @@ const config: Config = {
         "text-tertiary": "var(--text-tertiary)",
         "accent-primary": "var(--accent-primary)",
         "accent-dim": "var(--accent-dim)",
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
         background: "var(--bg-primary)",
         foreground: "var(--text-primary)",
         primary: {

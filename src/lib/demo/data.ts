@@ -340,32 +340,141 @@ function buildTrades(): Trade[] {
 
 export const demoTrades: Trade[] = buildTrades();
 
-export const demoJournals: Journal[] = (() => {  const closed = demoTrades.filter((t) => t.status === "closed").slice(0, 24);
-  const emotionIds = demoEmotions.map((e) => e.id);
+const TRADER_JOURNAL_TEMPLATES = [
+  {
+    title: "London Fix Sweep & MSS di M5",
+    lesson: "Konfirmasi breaker block M5 valid setelah liquidity run di Asian high. RR 1:2.8 tercapai tanpa floating drawdown berarti.",
+    mistake: "Sempat ragu entry karena ada high-impact news 40 menit lagi, tapi setup clean A+ jadi tetap eksekusi playbook.",
+    content: "Disiplin nunggu candle close di atas FVG M5. Execution on-point, partial 70% di liquidity pool terdekat, sisanya runner.",
+    plan: "Pantau reaksi DXY di open New York besok. Jangan paksakan entry kalau London sudah ekspansi lebar.",
+    mood: 5,
+    emotions: ["tenang", "disiplin", "sabar"],
+  },
+  {
+    title: "Chasing Gold Breakout di Pre-NY",
+    lesson: "Gold lagi ranging sempit sebelum CPI release. Market cuma sweep equal highs lalu dump instan. Wajib hindari trade 1 jam sebelum red-folder news.",
+    mistake: "FOMO liat volume spike di M1 chart. Cut loss manual telat 4 pip dari plan awal gara-gara denial.",
+    content: "Mental terpancing ingin cepat pulih drawdown harian. Beruntung langsung sadar dan shutdown laptop sebelum revenge trading.",
+    plan: "Besok wajib patuh hard rule: maksimal 2 trade per sesi dan dilarang entry saat red-folder news.",
+    mood: 1,
+    emotions: ["fomo", "ragu", "revenge-trading"],
+  },
+  {
+    title: "Asia Low Liquidity Grab -> London Expansion",
+    lesson: "Market structure shift (MSS) sangat bersih di 15m. Entry limit order di discount equilibrium 50% mitigasi Order Block.",
+    mistake: "Trailing stop agak mepet di BE+2 pips, untung tidak tersapu wick sebelum lari ke target final 1:3.1R.",
+    content: "Setup London Open Breakout standar. Mood tenang dan tidak ada overthinking karena risk terukur hanya 0.5% dari akun.",
+    plan: "Fokus pair GBPJPY dan EURJPY saja di sesi London besok.",
+    mood: 4,
+    emotions: ["tenang", "disiplin", "percaya-diri"],
+  },
+  {
+    title: "Overtrading di Lunch Sesi New York",
+    lesson: "Jam 12.00 - 13.30 NY volume drop drastis. Algoritma cuma bikin liquidity trap di range sempit.",
+    mistake: "Paksakan trade padahal setup B-grade hanya karena bosan mantengin monitor. Mental gatal ingin aksi.",
+    content: "Screen time tanpa disiplin adalah musuh utama trader. Belajar bahwa 'tidak trading' juga merupakan posisi.",
+    plan: "Pasang alarm penutup laptop tepat jam 12 siang NY. Lanjut gym atau review jurnal di luar market.",
+    mood: 2,
+    emotions: ["serakah", "fomo", "ragu"],
+  },
+  {
+    title: "Silver Bullet NY AM Session on XAUUSD",
+    lesson: "Model ICT Silver Bullet jam 10:00 - 11:00 NY bekerja presisi. Fair Value Gap terisi sempurna lalu harga ekspansi ke buy-side liquidity.",
+    mistake: "Tidak ada kesalahan eksekusi mayor. Hanya terlambat taking profit 2 menit saat target hit.",
+    content: "Trade paling santai minggu ini. Semua checklist A+ terpenuhi sebelum tombol buy ditekan.",
+    plan: "Pertahankan konsistensi risk 0.75%. Review chart malam ini untuk dokumentasi playbook.",
+    mood: 5,
+    emotions: ["tenang", "percaya-diri", "sabar"],
+  },
+  {
+    title: "Counter-Trend Menangkap Pisau Jatuh di DXY Spike",
+    lesson: "D1 bearish trend masih sangat dominan. Reversal di higher timeframe butuh akumulasi panjang, bukan V-shape instan.",
+    mistake: "Mencoba tebak bottom counter-trend hanya karena indikator RSI sudah oversold di timeframe kecil. Melanggar bias HTF.",
+    content: "Kena SL penuh -1R. Mengakui kekeliruan tanpa mencari kambing hitam broker atau berita.",
+    plan: "Kembali ke prinsip follow the trend. Hanya cari setup yang searah dengan H4 market structure.",
+    mood: 2,
+    emotions: ["takut", "ragu", "fomo"],
+  },
+  {
+    title: "FVG Inversion di London-NY Overlap",
+    lesson: "Bearish FVG yang ditembus impulsif berganti fungsi jadi support kuat (Inversion FVG). Retest memberi R:R 1:2.4.",
+    mistake: "Sedikit ragu pas retest pertama, akhirnya dapat entry 2 pips lebih buruk dari harga optimal.",
+    content: "Overlap session selalu kasih volume terbaik. Risk terukur dan stop loss logis di bawah swing low.",
+    plan: "Tandai zona FVG inversion di timeframe 1H setiap pergantian sesi.",
+    mood: 4,
+    emotions: ["sabar", "disiplin", "tenang"],
+  },
+  {
+    title: "Stop Out Breakeven karena Panik Geser SL",
+    lesson: "Market butuh ruang bernapas saat retest intermediate high sebelum ekspansi lanjutan.",
+    mistake: "Memindahkan stop loss ke BE terlalu dini saat baru running 0.9R. Kena wick lalu harga terbang 70 pips tanpa saya.",
+    content: "Fear of losing profit mengalahkan logika probabilitas. Stop micromanaging trade yang sedang berjalan.",
+    plan: "Gunakan aturan hard: SL baru boleh ke BE setelah target Partial 1 (minimal 1.5R) tersentuh.",
+    mood: 3,
+    emotions: ["takut", "ragu", "sabar"],
+  },
+  {
+    title: "Scalp Tokyo Session Boundary Fade",
+    lesson: "Range Tokyo sempit 22 pips. Setup fade di batas supply dengan stop ketat 7 pips menghasilkan +1.4R cepat.",
+    mistake: "Lot size sedikit under-risk (0.35%) karena ragu dengan likuiditas Asia.",
+    content: "Eksekusi rapi tanpa emosi. Ambil profit lalu langsung istirahat pagi.",
+    plan: "Catat data range Asia untuk konfirmasi bias ekspansi London nanti sore.",
+    mood: 4,
+    emotions: ["tenang", "disiplin"],
+  },
+  {
+    title: "Kecerobohan Pending Order Tanpa Konfirmasi M1",
+    lesson: "Zona order block H4 bagus tidak menjamin harga langsung memantul. Reaksi price action lokal tetap wajib diverifikasi.",
+    mistake: "Pasang limit order buta (blind entry) saat volatilitas rilis suku bunga bank sentral.",
+    content: "Kena stop loss dalam 3 menit. Pengingat keras bahwa market tidak berhutang apapun pada analisis kita.",
+    plan: "Wajibkan konfirmasi Lower Timeframe Choch sebelum eksekusi di level supply/demand mayor.",
+    mood: 2,
+    emotions: ["fomo", "ragu", "takut"],
+  },
+  {
+    title: "Reversal Bersih di Key Psychological Level 1.3700",
+    lesson: "Round number 1.3700 USDCAD bertindak sebagai magnet likuiditas institusional. Rejection pin bar sangat solid.",
+    mistake: "Keluar seluruh posisi di 2R, padahal ada runner potensial sampai 3.5R ke support harian.",
+    content: "Sangat puas dengan kedisiplinan entry. Tidak ada kecemasan selama posisi aktif.",
+    plan: "Latih scaling out bertahap: 60% di TP1, 25% di TP2, 15% biarkan running sampai structural break.",
+    mood: 5,
+    emotions: ["percaya-diri", "disiplin", "tenang"],
+  },
+  {
+    title: "Pelanggaran Risk Per Trade Akibat Terbawa Emosi",
+    lesson: "Saat akun sedang floating loss atau draw down, menaikkan lot size adalah cara tercepat menghancurkan modal.",
+    mistake: "Risk dinaikkan dari standar 1% menjadi 2.2% karena merasa 'yakin 100%' setup ini tidak mungkin gagal.",
+    content: "Tamparan keras bagi ego. Tidak ada setup yang 100% di trading. Disiplin position sizing adalah benteng terakhir.",
+    plan: "Kunci lot size calculator di kalkulator Tradoxes, tidak boleh rubah max risk 1% apapun yang terjadi.",
+    mood: 1,
+    emotions: ["revenge-trading", "serakah", "takut"],
+  },
+];
+
+export const demoJournals: Journal[] = (() => {
+  const closed = demoTrades.filter((t) => t.status === "closed").slice(0, 24);
+  const emotionMap = new Map(demoEmotions.map((e) => [e.slug, e.id]));
 
   return closed.map((trade, i) => {
     const positive = trade.pnl > 0;
-    const chosen = positive
-      ? [emotionIds[0], emotionIds[1], emotionIds[2]]
-      : [emotionIds[4], emotionIds[6], emotionIds[5]];
+    const templateIndex = (i * 2 + (positive ? 0 : 1)) % TRADER_JOURNAL_TEMPLATES.length;
+    const tpl = TRADER_JOURNAL_TEMPLATES[templateIndex];
+
+    const mappedEmotionIds = tpl.emotions
+      .map((slug) => emotionMap.get(slug))
+      .filter((id): id is string => Boolean(id));
 
     return {
       id: `50000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`,
       trade_id: trade.id,
       journal_date: trade.traded_at.slice(0, 10),
-      title: positive ? "Eksekusi rapi, sabar terbayar" : "Kalah tapi proses benar",
-      mood_score: positive ? 4 : 2,
-      emotion_ids: chosen,
-      lesson_learned: positive
-        ? "Menunggu sweep benar-benar selesai memberi entry jauh lebih presisi."
-        : "Terlalu cepat masuk sebelum candle H1 close. Tunggu konfirmasi.",
-      mistakes: positive
-        ? "Hampir menambah posisi di luar plan — tahan diri."
-        : "Entry saat emosi setelah loss sebelumnya, ukuran posisi terlalu besar.",
-      plan_tomorrow: "Maksimal 2 setup per sesi. Skip kalau tidak ada sweep + CHoCH.",
-      content: positive
-        ? "Sesi berjalan sesuai rencana. Fokus pada proses, bukan hasil."
-        : "Hari berat. Berhenti setelah 2 loss, tidak lanjut revenge trading.",
+      title: `${tpl.title} (${trade.instrument})`,
+      mood_score: positive ? Math.max(3, tpl.mood) : Math.min(3, tpl.mood),
+      emotion_ids: mappedEmotionIds.length > 0 ? mappedEmotionIds : [demoEmotions[0].id],
+      lesson_learned: tpl.lesson,
+      mistakes: tpl.mistake,
+      plan_tomorrow: tpl.plan,
+      content: tpl.content,
       created_at: trade.closed_at ?? trade.traded_at,
       updated_at: trade.closed_at ?? trade.traded_at,
     };

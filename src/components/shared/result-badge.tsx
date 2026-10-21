@@ -77,7 +77,7 @@ export function InstrumentBadge({ instrument, className }: { instrument: string;
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded border border-border/80 bg-muted/50 px-1.5 py-0.5 font-mono text-[11px] font-medium tracking-tight text-foreground/90",
+        "inline-flex items-center rounded-md border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 font-mono text-[11px] font-bold tracking-tight text-[#f4f4f5]",
         className,
       )}
     >

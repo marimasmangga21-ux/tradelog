@@ -56,9 +56,9 @@
     --accent-foreground: var(--text-primary);
     --destructive: var(--danger);
     --destructive-foreground: #ffffff;
-    --border: var(--border-subtle);
-    --input: var(--border-subtle);
-    --ring: var(--accent-primary);
+    --border: #222228;
+    --input: #222228;
+    --ring: rgba(178, 255, 5, 0.4);
 
     --profit: var(--accent-primary);
     --profit-foreground: #000000;
@@ -86,9 +86,9 @@
     --accent-foreground: var(--text-primary);
     --destructive: var(--danger);
     --destructive-foreground: #ffffff;
-    --border: var(--border-subtle);
-    --input: var(--border-subtle);
-    --ring: var(--accent-primary);
+    --border: #222228;
+    --input: #222228;
+    --ring: rgba(178, 255, 5, 0.4);
     --profit: var(--accent-primary);
     --loss: var(--danger);
   }
