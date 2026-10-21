@@ -84,7 +84,7 @@ export async function POST(request: Request) {
           draft.profile.updated_at = nowIso();
           return { ...draft.profile };
         },
-        { keepSample: true }
+        { keepSample: true, targetEmail: email }
       );
 
       const sessionPayload = {

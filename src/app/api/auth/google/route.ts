@@ -45,15 +45,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const normalizedEmail = body.email.trim().toLowerCase();
+
     const updatedProfile = await mutateDb(
       (db) => {
         db.profile.name = body.name || db.profile.name || "Trader";
-        db.profile.email = body.email || db.profile.email;
-        db.profile.avatar_url = body.avatar_url || db.profile.avatar_url;
+        db.profile.email = normalizedEmail;
+        if (body.avatar_url) db.profile.avatar_url = body.avatar_url;
         db.profile.updated_at = nowIso();
         return { ...db.profile };
       },
-      { keepSample: true }
+      { keepSample: true, targetEmail: normalizedEmail }
     );
 
     const sessionPayload = {
