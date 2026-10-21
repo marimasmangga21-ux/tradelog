@@ -268,17 +268,17 @@ export function Sidebar() {
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" side="right" className="w-56 border-white/[0.08] bg-[#0c0c0e]/95 backdrop-blur-xl">
+          <DropdownMenuContent align="end" side="right" className="w-56 border-[#222228] bg-[#0c0c0e]/95 backdrop-blur-xl">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center gap-1.5">
                   <p className="text-xs font-semibold text-[#f4f4f5]">{userName}</p>
-                  {userEmail && <GoogleIcon className="h-3 w-3" />}
+                  {userEmail && <GoogleIcon className="h-3.5 w-3.5" />}
                 </div>
                 <p className="text-[10px] text-[#71717a] truncate">{userEmail || "Mode Lokal"}</p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/[0.06]" />
+            <DropdownMenuSeparator className="bg-[#222228]" />
 
             <DropdownMenuItem asChild>
               <Link href="/settings" className="cursor-pointer gap-2 text-xs">
@@ -287,22 +287,13 @@ export function Sidebar() {
               </Link>
             </DropdownMenuItem>
 
-            {userEmail ? (
-              <DropdownMenuItem
-                onClick={() => void logout()}
-                className="cursor-pointer gap-2 text-xs text-red-400 focus:text-red-400 focus:bg-red-500/10"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Keluar Akun Google</span>
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem asChild>
-                <Link href="/login" className="cursor-pointer gap-2 text-xs text-[#b2ff05] focus:text-[#b2ff05] focus:bg-[#b2ff05]/10">
-                  <GoogleIcon className="h-3.5 w-3.5" />
-                  <span>Masuk dengan Google</span>
-                </Link>
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem
+              onClick={() => void logout()}
+              className="cursor-pointer gap-2 text-xs text-red-400 focus:text-red-400 focus:bg-red-500/10"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Keluar Akun</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -435,7 +426,7 @@ export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
         );
       })}
 
-      <div className="pt-2 border-t border-white/[0.06] mt-2">
+      <div className="pt-2 border-t border-[#222228] mt-2">
         <button
           type="button"
           onClick={() => {

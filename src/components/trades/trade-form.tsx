@@ -733,8 +733,8 @@ export function TradeForm({
           </Card>
 
           {/* Section 4: Alur Jurnal 8 Langkah Evaluasi Psikologi */}
-          <Card className="border-[#b2ff05]/30 bg-[#0d0d0f]">
-            <CardHeader className="pb-3 border-b border-white/[0.06]">
+          <Card className="border-[#222228] bg-[#0d0d0f] shadow-lg">
+            <CardHeader className="pb-3 border-b border-[#222228]">
               <CardTitle className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-white">
                   <span className="grid h-5 w-5 place-items-center rounded bg-[#b2ff05] font-mono text-[10px] font-bold text-black">
@@ -767,7 +767,7 @@ export function TradeForm({
                             ? mode === "BELI"
                               ? "bg-emerald-500 text-black border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
                               : "bg-red-500 text-white border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.4)]"
-                            : "border-white/10 bg-black/40 text-[#71717a] hover:text-white"
+                            : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
                         {mode === "BELI" ? "BELI (LONG)" : "JUAL (SHORT)"}
@@ -788,7 +788,7 @@ export function TradeForm({
                           "flex-1 rounded-lg py-2 text-[11px] font-semibold transition-all border",
                           journalFlow.duration === dur
                             ? "bg-[#b2ff05] text-black border-[#b2ff05] shadow-[0_0_10px_rgba(178,255,5,0.4)]"
-                            : "border-white/10 bg-black/40 text-[#71717a] hover:text-white"
+                            : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
                         {dur}
@@ -810,7 +810,7 @@ export function TradeForm({
                     setValue("notes", val);
                   }}
                   placeholder="Misal: Likuiditas London tersapu, retest Order Block M15 + konfirmasi CHoCH di M1..."
-                  className="text-xs bg-black/40 border-white/10"
+                  className="text-xs bg-[#0c0c0e] border-[#222228] focus:border-[#b2ff05]"
                 />
               </div>
 
@@ -833,7 +833,7 @@ export function TradeForm({
                         "rounded-full px-2.5 py-1 text-[11px] font-medium border transition-all",
                         journalFlow.preEmotion === feel
                           ? "border-[#b2ff05] bg-[#b2ff05]/15 text-[#b2ff05]"
-                          : "border-white/10 bg-black/30 text-[#71717a] hover:text-white"
+                          : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                       )}
                     >
                       {feel}
@@ -858,7 +858,7 @@ export function TradeForm({
                             ? res === "LABA"
                               ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50"
                               : "bg-red-500/20 text-red-400 border-red-500/50"
-                            : "border-white/10 bg-black/40 text-[#71717a]"
+                            : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
                         {res}
@@ -882,7 +882,7 @@ export function TradeForm({
                           "flex-1 rounded-lg py-2 text-[11px] font-bold border transition-all",
                           journalFlow.exitReasonType === r
                             ? "bg-[#b2ff05]/20 text-[#b2ff05] border-[#b2ff05]/50"
-                            : "border-white/10 bg-black/40 text-[#71717a] hover:text-white"
+                            : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
                         {r}
@@ -911,7 +911,7 @@ export function TradeForm({
                         "rounded-full px-2.5 py-1 text-[11px] font-medium border transition-all",
                         journalFlow.postEmotion === feel
                           ? "border-[#b2ff05] bg-[#b2ff05]/15 text-[#b2ff05]"
-                          : "border-white/10 bg-black/30 text-[#71717a] hover:text-white"
+                          : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                       )}
                     >
                       {feel}
@@ -932,8 +932,8 @@ export function TradeForm({
                       className={cn(
                         "flex-1 rounded-lg py-1.5 text-[11px] font-bold border transition-all",
                         journalFlow.improvementType === cat
-                          ? "bg-white text-black border-white"
-                          : "border-white/10 bg-black/40 text-[#71717a] hover:text-white"
+                          ? "bg-[#b2ff05] text-black border-[#b2ff05] shadow-[0_0_10px_rgba(178,255,5,0.4)]"
+                          : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                       )}
                     >
                       {cat}
@@ -950,7 +950,7 @@ export function TradeForm({
                         ? "Evaluasi manusia: Kurangi screen time, jangan overtrade setelah loss..."
                         : "Evaluasi lanjutan: Backtest setup ini di 50 sampel data..."
                   }
-                  className="text-xs bg-black/40 border-white/10"
+                  className="text-xs bg-[#0c0c0e] border-[#222228] focus:border-[#b2ff05]"
                 />
               </div>
             </CardContent>

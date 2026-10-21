@@ -173,7 +173,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
   return (
     <div>
       {/* Mobile Top Sub-tabs TRADES vs JOURNALS */}
-      <div className="flex items-center gap-6 border-b border-white/[0.08] pb-2 px-1 lg:hidden mb-3.5">
+      <div className="flex items-center gap-6 border-b border-[#222228] pb-2 px-1 lg:hidden mb-3.5">
         <button
           type="button"
           className="relative pb-2 font-mono text-xs font-bold uppercase tracking-wider text-white"
@@ -529,7 +529,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                   {idx === 1 && latestJournal && (
                     <Link
                       href={`/journal`}
-                      className="mobile-card block p-4 space-y-2 border-white/[0.08] hover:border-white/20 transition-colors"
+                      className="mobile-card block p-4 space-y-2 border-[#222228] hover:border-[#b2ff05]/40 transition-colors"
                     >
                       <div className="flex items-center justify-between text-xs text-[#8e8e93]">
                         <div className="flex items-center gap-1.5 font-medium text-[#d4d4d8]">
@@ -575,13 +575,13 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
                   <Link
                     href={`/trades/${trade.id}`}
-                    className="mobile-card block p-4 transition-all duration-200 hover:border-white/20 active:scale-[0.99]"
+                    className="mobile-card block p-4 transition-all duration-200 border-[#222228] hover:border-[#b2ff05]/40 active:scale-[0.99]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       {/* Bagian Kiri: Info Coin, Direction, PnL, Tags */}
                       <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1.5 rounded-lg bg-black/40 border border-white/10 px-2.5 py-1 font-mono text-xs font-bold text-white">
+                          <span className="flex items-center gap-1.5 rounded-lg bg-[#0c0c0e] border border-[#222228] px-2.5 py-1 font-mono text-xs font-bold text-white">
                             <span className="h-2 w-2 rounded-full bg-[#f7931a]" />
                             {trade.instrument}
                           </span>
@@ -616,11 +616,11 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                         {/* Sub-badges: R:R & Setup */}
                         <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                           {trade.r_multiple != null && (
-                            <span className="rounded-md border border-white/10 bg-black/30 px-2 py-0.5 font-mono text-[10px] text-[#a1a1aa]">
+                            <span className="rounded-md border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 font-mono text-[10px] text-[#a1a1aa]">
                               R:R {trade.r_multiple > 0 ? `1:${trade.r_multiple.toFixed(1)}` : "1:1"}
                             </span>
                           )}
-                          <span className="rounded-md border border-white/10 bg-black/30 px-2 py-0.5 text-[10px] font-medium text-[#d4d4d8]">
+                          <span className="rounded-md border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 text-[10px] font-medium text-[#d4d4d8]">
                             {strategy?.name || trade.tags[0] || "Trend Following"}
                           </span>
                         </div>
@@ -628,7 +628,7 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
                       {/* Bagian Kanan: Thumbnail Candlestick & Camera Icon */}
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-white/10 bg-[#0c0c0e] p-1 shadow-inner">
+                        <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-[#222228] bg-[#0c0c0e] p-1 shadow-inner">
                           {/* Mini Candlestick Graphic */}
                           <svg className="h-full w-full" viewBox="0 0 80 50">
                             <line x1="16" y1="8" x2="16" y2="42" stroke="#ef4444" strokeWidth="1" />

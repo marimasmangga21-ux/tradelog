@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Plus, RefreshCw, Smartphone, Zap } from "lucide-react";
+import { LogOut, Menu, Plus, RefreshCw, Smartphone, Zap } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export function Topbar() {
   const pathname = usePathname();
-  const { syncMt5, syncingMt5, profile } = useData();
+  const { syncMt5, syncingMt5, profile, logout } = useData();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   async function handleSync() {
@@ -46,7 +46,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-[#1a1a1a] bg-black/90 px-3 backdrop-blur-md sm:px-6">
-      {/* Mobile Topbar View: Logo TRADELOG + Profil Pill + Drawer */}
+      {/* Mobile Topbar View: Logo TRADELOG + Profil Pill + Logout + Drawer */}
       <div className="flex w-full items-center justify-between lg:hidden">
         <Link href="/dashboard" className="flex items-center gap-2">
           <img
@@ -59,10 +59,10 @@ export function Topbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Link
             href="/settings"
-            className="flex items-center gap-1.5 rounded-full bg-white/[0.04] p-1 pr-2.5 border border-white/[0.06] hover:border-white/20 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-[#121215] p-1 pr-2.5 border border-[#222228] hover:border-[#b2ff05]/40 transition-colors"
           >
             <img
               src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan"}
@@ -74,18 +74,28 @@ export function Topbar() {
             </span>
           </Link>
 
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#222228] bg-[#141418] text-[#a1a1aa] hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            title="Keluar / Logout"
+            aria-label="Logout"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
+
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-[#141418] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#222228] bg-[#141418] text-[#a1a1aa] hover:border-[#b2ff05]/40 hover:text-white transition-colors"
                 aria-label="Open menu"
               >
                 <Menu className="h-4 w-4" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] border-white/10 bg-[#09090b] p-5 text-white">
-              <SheetHeader className="text-left pb-4 border-b border-white/10">
+            <SheetContent side="right" className="w-[280px] border-[#222228] bg-[#09090b] p-5 text-white">
+              <SheetHeader className="text-left pb-4 border-b border-[#222228]">
                 <SheetTitle className="flex items-center gap-2 text-white">
                   <img src="/logo-icon.png" alt="TRADELOG" className="h-6 w-6 rounded-md" />
                   <span className="font-mono text-sm font-extrabold tracking-wider text-[#b2ff05]">
@@ -95,7 +105,7 @@ export function Topbar() {
               </SheetHeader>
               <div className="mt-5 space-y-4">
                 <MobileMenuList onSelect={() => setDrawerOpen(false)} />
-                <div className="pt-4 border-t border-white/10">
+                <div className="pt-4 border-t border-[#222228]">
                   <Button
                     type="button"
                     variant="outline"
@@ -105,7 +115,7 @@ export function Topbar() {
                       handleSync();
                     }}
                     disabled={syncingMt5}
-                    className="w-full justify-center gap-2 rounded-xl border-white/10 bg-[#121215] text-xs text-white hover:border-[#b2ff05]/40 hover:text-[#b2ff05]"
+                    className="w-full justify-center gap-2 rounded-xl border-[#222228] bg-[#121215] text-xs text-white hover:border-[#b2ff05]/40 hover:text-[#b2ff05]"
                   >
                     <RefreshCw className={cn("h-3.5 w-3.5", syncingMt5 && "animate-spin text-[#b2ff05]")} />
                     <span>{syncingMt5 ? "Syncing..." : "Sync MT5"}</span>
@@ -158,24 +168,40 @@ export function Topbar() {
             <span>Log Trade</span>
           </Link>
 
-          {/* User profile / Google badge */}
+          {/* User profile pill */}
           <Link
             href="/settings"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121215] transition-transform hover:scale-105"
+            className="flex h-8 items-center gap-2 rounded-full border border-[#222228] bg-[#121215] p-1 pr-3 transition-colors hover:border-[#b2ff05]/40"
             title={profile?.email ? `Login sebagai ${profile.name} (${profile.email})` : "Pengaturan Akun"}
           >
             {profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.name || "User"}
-                className="h-full w-full rounded-full object-cover"
+                className="h-6 w-6 rounded-full object-cover"
               />
             ) : (
-              <span className="text-[11px] font-bold text-[#b2ff05]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#27272a] text-[11px] font-bold text-[#b2ff05]">
                 {(profile?.name || "T").slice(0, 1).toUpperCase()}
               </span>
             )}
+            <span className="text-xs font-semibold text-white max-w-[100px] truncate">
+              {profile?.name || "Evan Mita"}
+            </span>
           </Link>
+
+          {/* Direct Logout Button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void logout()}
+            className="h-8 gap-1.5 border-[#222228] bg-[#121215] px-2.5 text-xs text-[#a0a0a0] transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400"
+            title="Keluar dari akun Tradelog"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Keluar</span>
+          </Button>
         </div>
       </div>
     </header>

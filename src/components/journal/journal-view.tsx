@@ -174,7 +174,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
   return (
     <div className="space-y-4">
       {/* Mobile Top Sub-tabs TRADES vs JOURNALS */}
-      <div className="flex items-center gap-6 border-b border-white/[0.08] pb-2 px-1 lg:hidden">
+      <div className="flex items-center gap-6 border-b border-[#222228] pb-2 px-1 lg:hidden">
         <Link
           href="/trades"
           className="pb-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#71717a] hover:text-white transition"
@@ -263,7 +263,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                 const journalEmotions = emotions.filter((e) => journal.emotion_ids.includes(e.id));
 
                 return (
-                  <div key={journal.id} className="mobile-card p-4 space-y-2 transition-all duration-200 hover:border-white/20">
+                  <div key={journal.id} className="mobile-card p-4 space-y-2 transition-all duration-200 border-[#222228] hover:border-[#b2ff05]/40">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -289,7 +289,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                           {trade && (
                             <Link
                               href={`/trades/${trade.id}`}
-                              className="flex items-center gap-1 rounded-lg border border-white/10 bg-black/40 px-2 py-0.5 text-[10px] hover:border-[#b2ff05]/40"
+                              className="flex items-center gap-1 rounded-lg border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 text-[10px] hover:border-[#b2ff05]/40"
                             >
                               <span className="font-mono font-bold text-white">{trade.instrument}</span>
                               <span
@@ -312,7 +312,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 border-white/10 bg-[#0e0e12]">
+                        <DropdownMenuContent align="end" className="w-40 border-[#222228] bg-[#0e0e12]">
                           <DropdownMenuItem
                             onClick={() => {
                               setEditing(journal.id);
@@ -338,7 +338,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                         {journalEmotions.map((e) => (
                           <span
                             key={e.id}
-                            className="rounded-full px-2.5 py-0.5 text-[10px] font-bold border border-white/10 bg-white/[0.04] text-[#d4d4d8]"
+                            className="rounded-full px-2.5 py-0.5 text-[10px] font-bold border border-[#222228] bg-[#0c0c0e] text-[#d4d4d8]"
                             style={{
                               color: e.color || "#b2ff05",
                               borderColor: `${e.color || "#b2ff05"}40`,
@@ -364,7 +364,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                       </p>
                     )}
                     {journal.content && (
-                      <p className="mt-2 border-t border-white/[0.06] pt-2 text-xs leading-relaxed text-[#8e8e93]">
+                      <p className="mt-2 border-t border-[#222228] pt-2 text-xs leading-relaxed text-[#8e8e93]">
                         {journal.content}
                       </p>
                     )}
@@ -387,8 +387,8 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
 
         {/* Panel statistik emosi */}
         <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <div className="tradoxes-card rounded-2xl p-5">
-            <div className="pb-3 border-b border-white/[0.06]">
+          <div className="tradoxes-card rounded-2xl p-5 border border-[#222228]">
+            <div className="pb-3 border-b border-[#222228]">
               <div className="flex items-center gap-2">
                 <Brain className="h-4 w-4 text-[#b2ff05]" />
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-[#8e8e93]">{t("journal.statsTitle")}</h3>
@@ -397,7 +397,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
             </div>
             <div className="pt-3">
               {emotionStats.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/10 py-8 text-center bg-black/20">
+                <div className="rounded-xl border border-dashed border-[#222228] py-8 text-center bg-[#0c0c0e]">
                   <Sparkles className="mx-auto h-5 w-5 text-[#71717a]" />
                   <p className="mt-2 px-4 text-xs leading-relaxed text-[#71717a]">
                     {t("journal.noStats")}
@@ -422,7 +422,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                           {formatPercent(stat.winRate, 0)}
                         </span>
                       </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-[#1c1c22]">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{
@@ -494,7 +494,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
                   <span className="text-xs text-[#71717a] font-normal"> / 5</span>
                 </p>
               </div>
-              <div className="col-span-2 border-t border-white/[0.06] pt-2 flex items-center justify-between">
+              <div className="col-span-2 border-t border-[#222228] pt-2 flex items-center justify-between">
                 <p className="text-[11px] text-[#8e8e93]">
                   {t("journal.linkedTrade")}
                 </p>
