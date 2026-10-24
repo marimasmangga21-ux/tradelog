@@ -576,10 +576,10 @@ export function DashboardView({
                       <span
                         className={cn(
                           "font-mono text-xs font-bold block",
-                          (t.pnl || 0) >= 0 ? "text-[#b2ff05]" : "text-[#ff4d4d]",
+                          (t.pnl || 0) > 0 ? "text-[#b2ff05]" : (t.pnl || 0) < 0 ? "text-[#ff4d4d]" : "text-amber-400",
                         )}
                       >
-                        {privacyMode ? "$ •••" : `${(t.pnl || 0) >= 0 ? "+" : ""}$${t.pnl?.toFixed(2)}`}
+                        {privacyMode ? "$ •••" : `${(t.pnl || 0) > 0 ? "+" : ""}$${(t.pnl || 0).toFixed(2)}`}
                       </span>
                     </div>
                   </Link>

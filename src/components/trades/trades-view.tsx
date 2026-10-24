@@ -412,23 +412,23 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
           />
         )
       ) : (
-        <div className="tradoxes-card overflow-hidden rounded-2xl border border-white/[0.06]">
+        <div className="tradoxes-card overflow-hidden rounded-2xl border border-white/[0.08] shadow-xl">
           {/* Desktop table */}
-          <div className="hidden max-h-[70vh] overflow-auto lg:block">
-            <table className="w-full">
-              <thead className="sticky top-0 z-10 border-b border-white/[0.04] bg-[#09090b]/95 backdrop-blur-md">
-                <tr className="text-left text-[10px] uppercase tracking-wider text-[#8e8e93]">
-                  <th className="px-4 py-3 font-semibold">{t("trades.date")}</th>
-                  <th className="px-3 py-3 font-semibold">{t("trades.instrument")}</th>
-                  <th className="px-3 py-3 font-semibold">{t("trades.session")}</th>
-                  <th className="px-3 py-3 font-semibold">{t("trades.account")}</th>
-                  <th className="px-3 py-3 font-semibold">{t("trades.strategy")}</th>
-                  <th className="px-3 py-3 text-right font-semibold">{t("trades.entry")}</th>
-                  <th className="px-3 py-3 text-right font-semibold">{t("trades.exit")}</th>
-                  <th className="px-3 py-3 text-right font-semibold">{t("trades.rr")}</th>
-                  <th className="px-3 py-3 text-right font-semibold">{t("trades.pnl")}</th>
-                  <th className="px-3 py-3 text-center font-semibold">{t("trades.result")}</th>
-                  <th className="w-8" />
+          <div className="hidden max-h-[72vh] overflow-auto lg:block">
+            <table className="w-full border-collapse text-left">
+              <thead className="sticky top-0 z-10 border-b border-white/[0.08] bg-[#0c0c0e]/95 backdrop-blur-md">
+                <tr className="text-left text-[11px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                  <th className="w-[140px] px-4 py-3.5">{t("trades.date")}</th>
+                  <th className="w-[180px] px-3 py-3.5">{t("trades.instrument")}</th>
+                  <th className="w-[105px] px-3 py-3.5">{t("trades.session")}</th>
+                  <th className="w-[130px] px-3 py-3.5">{t("trades.account")}</th>
+                  <th className="w-[130px] px-3 py-3.5">{t("trades.strategy")}</th>
+                  <th className="w-[100px] px-3 py-3.5 text-right">{t("trades.entry")}</th>
+                  <th className="w-[100px] px-3 py-3.5 text-right">{t("trades.exit")}</th>
+                  <th className="w-[85px] px-3 py-3.5 text-right">{t("trades.rr")}</th>
+                  <th className="w-[125px] px-3 py-3.5 text-right">{t("trades.pnl")}</th>
+                  <th className="w-[110px] px-3 py-3.5 text-center">{t("trades.result")}</th>
+                  <th className="w-[40px] py-3.5 pr-4 text-right" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
@@ -444,70 +444,98 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
                     other: "Other",
                   }[trade.session] ?? trade.session;
 
+                  const isProfit = trade.pnl > 0;
+                  const isLoss = trade.pnl < 0;
+
                   return (
                     <tr
                       key={trade.id}
-                      className="group h-12 cursor-pointer transition-colors hover:bg-white/[0.03]"
+                      className="group h-[54px] cursor-pointer transition-all duration-150 hover:bg-white/[0.04] active:bg-white/[0.06]"
                       onClick={() => router.push(`/trades/${trade.id}`)}
                     >
-                      <td className="whitespace-nowrap px-4 py-2 text-xs text-[#a0a0a0]">
-                        {new Date(trade.traded_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "2-digit",
-                        })}
-                        <span className="ml-1.5 text-[10px] text-[#71717a]">
+                      <td className="w-[140px] whitespace-nowrap px-4 py-2.5">
+                        <div className="text-xs font-semibold text-[#f4f4f5]">
+                          {new Date(trade.traded_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "2-digit",
+                          })}
+                        </div>
+                        <div className="font-mono text-[10px] text-[#71717a]">
                           {new Date(trade.traded_at).toLocaleTimeString(locale === "id" ? "id-ID" : "en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                        </span>
+                        </div>
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="w-[180px] whitespace-nowrap px-3 py-2.5">
                         <div className="flex items-center gap-1.5">
                           <InstrumentBadge instrument={trade.instrument} />
                           <DirectionBadge direction={trade.direction} />
                         </div>
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="w-[105px] whitespace-nowrap px-3 py-2.5">
                         <span
                           title={`${sessionLabel} · ${sessionRangeLabel(trade.session)}`}
-                          className="rounded-md border border-[#222228] bg-[#0c0c0e] px-1.5 py-0.5 text-[10px] font-medium text-[#a1a1aa]"
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-semibold",
+                            trade.session === "asia" && "border-cyan-500/30 bg-cyan-500/10 text-cyan-400",
+                            trade.session === "london" && "border-purple-500/30 bg-purple-500/10 text-purple-400",
+                            trade.session === "new_york" && "border-pink-500/30 bg-pink-500/10 text-pink-400",
+                            trade.session === "sydney" && "border-amber-500/30 bg-amber-500/10 text-amber-400",
+                            (!trade.session || trade.session === "other") && "border-[#27272a] bg-[#121215] text-[#a1a1aa]",
+                          )}
                         >
-                          {sessionLabel}
+                          <span className="h-1.5 w-1.5 rounded-full shrink-0 bg-current opacity-80" />
+                          <span>{sessionLabel}</span>
                         </span>
                       </td>
-                      <td className="px-3 py-2">
-                        <span className="flex items-center gap-1.5 text-xs text-[#d4d4d8]">
+                      <td className="w-[130px] whitespace-nowrap px-3 py-2.5">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-[#d4d4d8]">
                           <span
-                            className="h-1.5 w-1.5 rounded-full shrink-0"
+                            className="h-2 w-2 rounded-full shrink-0"
                             style={{ backgroundColor: account?.color ?? "#64748b" }}
                           />
-                          <span className="max-w-[110px] truncate">{account?.name ?? "—"}</span>
+                          <span className="max-w-[105px] truncate font-medium">{account?.name ?? "—"}</span>
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-xs text-[#a1a1aa]">
-                        <span className="max-w-[120px] truncate">{strategy?.name ?? "—"}</span>
+                      <td className="w-[130px] whitespace-nowrap px-3 py-2.5 text-xs text-[#a1a1aa]">
+                        <span className="inline-block max-w-[115px] truncate font-medium text-zinc-300">
+                          {strategy?.name ?? "—"}
+                        </span>
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
-                        {trade.entry_price ?? "—"}
+                      <td className="w-[100px] whitespace-nowrap tabular px-3 py-2.5 text-right font-mono text-xs font-medium text-zinc-200">
+                        {trade.entry_price != null ? Number(trade.entry_price).toLocaleString("en-US", { maximumFractionDigits: 5 }) : "—"}
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
-                        {trade.exit_price ?? "—"}
+                      <td className="w-[100px] whitespace-nowrap tabular px-3 py-2.5 text-right font-mono text-xs font-medium text-zinc-200">
+                        {trade.exit_price != null ? Number(trade.exit_price).toLocaleString("en-US", { maximumFractionDigits: 5 }) : <span className="text-zinc-600">—</span>}
                       </td>
-                      <td className="tabular px-3 py-2 text-right font-mono text-[11px] text-[#a0a0a0]">
+                      <td className="w-[85px] whitespace-nowrap tabular px-3 py-2.5 text-right font-mono text-xs font-semibold text-zinc-300">
                         {formatR(trade.r_multiple)}
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        <span className={cn("tabular font-mono text-xs font-bold", pnlColor(trade.pnl))}>
-                          {trade.status === "open" ? "—" : hideAmounts ? formatR(trade.r_multiple) : formatSignedCurrency(trade.pnl, cur)}
-                        </span>
+                      <td className="w-[125px] whitespace-nowrap px-3 py-2.5 text-right">
+                        {trade.status === "open" ? (
+                          <span className="inline-block rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-400">
+                            OPEN
+                          </span>
+                        ) : (
+                          <span
+                            className={cn(
+                              "tabular font-mono text-xs font-bold",
+                              isProfit ? "text-emerald-400" : isLoss ? "text-red-400" : "text-amber-400",
+                            )}
+                          >
+                            {hideAmounts
+                              ? formatR(trade.r_multiple)
+                              : `${isProfit ? "+" : ""}${formatSignedCurrency(trade.pnl, cur)}`}
+                          </span>
+                        )}
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="w-[110px] whitespace-nowrap px-3 py-2.5 text-center">
                         <ResultBadge result={trade.result} showIcon={false} />
                       </td>
-                      <td className="pr-3">
-                        <ChevronDown className="h-3.5 w-3.5 -rotate-90 text-[#71717a] opacity-0 transition group-hover:opacity-100 group-hover:text-[#b2ff05]" />
+                      <td className="w-[40px] py-2.5 pr-4 text-right">
+                        <ChevronDown className="h-4 w-4 -rotate-90 text-[#71717a] transition group-hover:translate-x-0.5 group-hover:text-[#b2ff05]" />
                       </td>
                     </tr>
                   );
@@ -517,12 +545,13 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
           </div>
 
           {/* Mobile list: Presisi Gambar 3 dari WhatsApp */}
-          <div className="space-y-3.5 lg:hidden">
+          <div className="space-y-3.5 lg:hidden p-2 sm:p-3">
             {paged.map((trade, idx) => {
               const account = accounts.find((a) => a.id === trade.account_id);
               const strategy = strategies.find((s) => s.id === trade.strategy_id);
               const cur = account?.currency ?? currency;
-              const isProfit = (trade.pnl || 0) >= 0;
+              const isProfit = trade.pnl > 0;
+              const isLoss = trade.pnl < 0;
 
               return (
                 <React.Fragment key={trade.id}>
@@ -576,79 +605,66 @@ export function TradesView({ hideAmounts }: { hideAmounts: boolean }) {
 
                   <Link
                     href={`/trades/${trade.id}`}
-                    className="mobile-card block p-4 transition-all duration-200 border-[#222228] hover:border-[#b2ff05]/40 active:scale-[0.99]"
+                    className="mobile-card block p-4 transition-all duration-200 border-[#27272a] hover:border-[#b2ff05]/40 active:scale-[0.99] rounded-2xl"
                   >
                     <div className="flex items-start justify-between gap-3">
                       {/* Bagian Kiri: Info Coin, Direction, PnL, Tags */}
                       <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1.5 rounded-lg bg-[#0c0c0e] border border-[#222228] px-2.5 py-1 font-mono text-xs font-bold text-white">
-                            <span className="h-2 w-2 rounded-full bg-[#f7931a]" />
-                            {trade.instrument}
-                          </span>
-                          <span
-                            className={cn(
-                              "rounded-full px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wide",
-                              trade.direction === "long"
-                                ? "bg-[#10b981] text-black"
-                                : "bg-[#ef4444] text-white"
-                            )}
-                          >
-                            {trade.direction.toUpperCase()}
-                          </span>
+                          <InstrumentBadge instrument={trade.instrument} />
+                          <DirectionBadge direction={trade.direction} />
+                          {trade.status === "open" && (
+                            <span className="rounded-md border border-sky-500/30 bg-sky-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-400">
+                              OPEN
+                            </span>
+                          )}
                         </div>
 
                         {/* Nilai PnL Besar */}
                         <div>
                           <span
                             className={cn(
-                              "font-mono text-xl font-bold tracking-tight block",
-                              isProfit ? "text-[#10b981]" : "text-[#ef4444]"
+                              "font-mono text-xl font-extrabold tracking-tight block",
+                              trade.status === "open"
+                                ? "text-sky-400"
+                                : isProfit
+                                ? "text-emerald-400"
+                                : isLoss
+                                ? "text-red-400"
+                                : "text-amber-400",
                             )}
                           >
                             {trade.status === "open"
-                              ? "OPEN"
+                              ? "OPEN POSITION"
                               : hideAmounts
-                                ? formatR(trade.r_multiple)
-                                : `${isProfit ? "+" : ""}${formatSignedCurrency(trade.pnl, cur)}`}
+                              ? formatR(trade.r_multiple)
+                              : `${isProfit ? "+" : ""}${formatSignedCurrency(trade.pnl, cur)}`}
                           </span>
                         </div>
 
                         {/* Sub-badges: R:R & Setup */}
                         <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                           {trade.r_multiple != null && (
-                            <span className="rounded-md border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 font-mono text-[10px] text-[#a1a1aa]">
-                              R:R {trade.r_multiple > 0 ? `1:${trade.r_multiple.toFixed(1)}` : "1:1"}
+                            <span className="rounded-md border border-[#27272a] bg-[#121215] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#a1a1aa]">
+                              {formatR(trade.r_multiple)}
                             </span>
                           )}
-                          <span className="rounded-md border border-[#222228] bg-[#0c0c0e] px-2 py-0.5 text-[10px] font-medium text-[#d4d4d8]">
+                          <span className="rounded-md border border-[#27272a] bg-[#121215] px-2 py-0.5 text-[10px] font-medium text-[#d4d4d8]">
                             {strategy?.name || trade.tags[0] || "Trend Following"}
+                          </span>
+                          <span className="text-[10px] text-[#71717a] font-mono">
+                            {new Date(trade.traded_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                           </span>
                         </div>
                       </div>
 
-                      {/* Bagian Kanan: Thumbnail Candlestick & Camera Icon */}
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-[#222228] bg-[#0c0c0e] p-1 shadow-inner">
-                          {/* Mini Candlestick Graphic */}
-                          <svg className="h-full w-full" viewBox="0 0 80 50">
-                            <line x1="16" y1="8" x2="16" y2="42" stroke="#ef4444" strokeWidth="1" />
-                            <rect x="13" y="16" width="6" height="18" fill="#ef4444" rx="1" />
-                            <line x1="32" y1="12" x2="32" y2="38" stroke="#10b981" strokeWidth="1" />
-                            <rect x="29" y="15" width="6" height="15" fill="#10b981" rx="1" />
-                            <line x1="48" y1="6" x2="48" y2="34" stroke="#10b981" strokeWidth="1" />
-                            <rect x="45" y="10" width="6" height="16" fill="#10b981" rx="1" />
-                            <line x1="64" y1="14" x2="64" y2="40" stroke="#ef4444" strokeWidth="1" />
-                            <rect x="61" y="20" width="6" height="14" fill="#ef4444" rx="1" />
-                            <path d="M10,40 Q35,32 50,20 T75,12" fill="none" stroke="#eab308" strokeWidth="1.25" strokeDasharray="2,2" />
-                          </svg>
+                      {/* Bagian Kanan: Result Badge & Arrow */}
+                      <div className="flex flex-col items-end justify-between h-full gap-2 shrink-0 self-stretch">
+                        <ResultBadge result={trade.result} />
+                        <div className="mt-auto flex items-center gap-1 text-[11px] font-semibold text-[#b2ff05]">
+                          <span>Detail</span>
+                          <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
                         </div>
-                        <span className="text-[#71717a] hover:text-[#b2ff05] transition-colors p-0.5">
-                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-                            <circle cx="12" cy="13" r="3" />
-                          </svg>
-                        </span>
                       </div>
                     </div>
                   </Link>
