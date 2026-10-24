@@ -52,19 +52,19 @@ export function DashboardView({
   const losses = closedTrades.filter((t) => t.result === "loss");
   const breakevens = closedTrades.filter((t) => t.result === "breakeven");
 
-  const totalTrades = closedTrades.length || 48;
-  const winRate = totalTrades > 0 ? (wins.length / (closedTrades.length || 1)) * 100 || 68 : 68;
+  const totalTrades = closedTrades.length;
+  const winRate = closedTrades.length > 0 ? (wins.length / closedTrades.length) * 100 : 0;
 
   const grossProfit = wins.reduce((sum, t) => sum + (t.pnl || 0), 0);
   const grossLoss = Math.abs(losses.reduce((sum, t) => sum + (t.pnl || 0), 0));
-  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? grossProfit : 2.14;
+  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? grossProfit : 0;
 
   // Best pair
   const pairMap = new Map<string, number>();
   closedTrades.forEach((t) => {
     pairMap.set(t.instrument, (pairMap.get(t.instrument) || 0) + (t.pnl || 0));
   });
-  let bestPair = "BTC/USDT";
+  let bestPair = "—";
   let maxPnl = -Infinity;
   pairMap.forEach((pnl, pair) => {
     if (pnl > maxPnl && pnl > 0) {
@@ -73,11 +73,21 @@ export function DashboardView({
     }
   });
 
-  // Saldo
-  const totalDeposit = accounts.reduce((acc, a) => acc + (a.total_deposits ?? a.initial_balance ?? 0), 0) || 2426.5;
-  const netPnl = closedTrades.reduce((sum, t) => sum + (t.pnl || 0), 0) || 340.5;
-  const currentBalance = totalDeposit + netPnl || 2767.0;
-  const pnlPercent = totalDeposit > 0 ? (netPnl / totalDeposit) * 100 : 12.3;
+  // Saldo nyata tanpa dummy fallback
+  const totalDeposit = accounts.reduce((acc, a) => acc + (a.total_deposits ?? a.initial_balance ?? 0), 0);
+  const netPnl = closedTrades.reduce((sum, t) => sum + (t.pnl || 0), 0);
+  const currentBalance = totalDeposit + netPnl;
+  const pnlPercent = totalDeposit > 0 ? (netPnl / totalDeposit) * 100 : 0;
+
+  // Win streak
+  const winStreak = React.useMemo(() => {
+    let streak = 0;
+    for (const t of closedTrades) {
+      if (t.result === "win") streak++;
+      else break;
+    }
+    return streak;
+  }, [closedTrades]);
 
   // Data kurva saldo
   const chartData = React.useMemo(() => {
@@ -91,15 +101,15 @@ export function DashboardView({
       });
     });
     if (pts.length <= 1) {
-      // Default curve sample sesuai mockup Gambar 4
+      if (closedTrades.length === 0) {
+        return [
+          { date: "Start", balance: totalDeposit },
+          { date: "Now", balance: totalDeposit },
+        ];
+      }
       return [
-        { date: "Oct 1", balance: 2420 },
-        { date: "Oct 5", balance: 2480 },
-        { date: "Oct 9", balance: 2450 },
-        { date: "Oct 12", balance: 2560 },
-        { date: "Oct 15", balance: 2510 },
-        { date: "Oct 17", balance: 2680 },
-        { date: "Oct 20", balance: 2767 },
+        { date: "Start", balance: totalDeposit },
+        { date: "Now", balance: running },
       ];
     }
     return pts;
@@ -211,7 +221,7 @@ export function DashboardView({
                   stroke="#b2ff05"
                   strokeWidth="5.5"
                   strokeDasharray="170"
-                  strokeDashoffset={170 - (170 * (winRate || 68)) / 100}
+                  strokeDashoffset={170 - (170 * winRate) / 100}
                   strokeLinecap="round"
                   fill="transparent"
                   className="neon-ring transition-all duration-700"
@@ -220,7 +230,7 @@ export function DashboardView({
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="font-mono text-sm font-bold text-white tracking-tight leading-none">
-                  {Math.round(winRate || 68)}%
+                  {Math.round(winRate)}%
                 </span>
                 <span className="text-[9px] text-[#8e8e93] mt-0.5 leading-none">Win Rate</span>
               </div>
@@ -291,12 +301,12 @@ export function DashboardView({
           <div className="grid grid-cols-3 gap-2.5">
             <div className="mobile-card p-3 flex flex-col justify-between">
               <span className="text-[10px] text-[#8e8e93] font-medium">Trades:</span>
-              <span className="font-mono text-lg font-bold text-white mt-1">12</span>
+              <span className="font-mono text-lg font-bold text-white mt-1">{totalTrades}</span>
             </div>
 
             <div className="mobile-card p-3 flex flex-col justify-between">
               <span className="text-[10px] text-[#8e8e93] font-medium">Win Streak:</span>
-              <span className="font-mono text-lg font-bold text-white mt-1">4</span>
+              <span className="font-mono text-lg font-bold text-white mt-1">{winStreak}</span>
             </div>
 
             <Link

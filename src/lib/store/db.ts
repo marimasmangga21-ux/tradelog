@@ -52,31 +52,31 @@ export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 let memoryDb: Database | null = null;
 
 function seed(): Database {
-  const ownerDataset: UserDataset = {
-    is_sample: true,
+  const emptyOwnerDataset: UserDataset = {
+    is_sample: false,
     profile: {
       ...demoProfile,
       name: "Evan Mita",
       email: "marimasmangga21@gmail.com",
       avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
     },
-    accounts: demoAccounts.map((a) => ({ ...a })),
-    strategies: demoStrategies.map((s) => ({ ...s })),
-    trades: demoTrades.map((t) => ({ ...t })),
-    journals: demoJournals.map((j) => ({ ...j })),
+    accounts: [],
+    strategies: [],
+    trades: [],
+    journals: [],
     emotions: demoEmotions.map((e) => ({ ...e })),
     screenshots: [],
   };
 
   return {
     version: 1,
-    is_sample: true,
-    profile: ownerDataset.profile,
-    accounts: ownerDataset.accounts,
-    strategies: ownerDataset.strategies,
-    trades: ownerDataset.trades,
-    journals: ownerDataset.journals,
-    emotions: ownerDataset.emotions,
+    is_sample: false,
+    profile: emptyOwnerDataset.profile,
+    accounts: [],
+    strategies: [],
+    trades: [],
+    journals: [],
+    emotions: emptyOwnerDataset.emotions,
     screenshots: [],
     users: [
       {
@@ -89,7 +89,7 @@ function seed(): Database {
       },
     ],
     user_datasets: {
-      "marimasmangga21@gmail.com": ownerDataset,
+      "marimasmangga21@gmail.com": emptyOwnerDataset,
     },
   };
 }
@@ -129,6 +129,18 @@ function normalize(raw: unknown): Database {
   const userDatasets = obj.user_datasets && typeof obj.user_datasets === "object" ? obj.user_datasets : {};
   if (!userDatasets["marimasmangga21@gmail.com"]) {
     userDatasets["marimasmangga21@gmail.com"] = base.user_datasets["marimasmangga21@gmail.com"];
+  }
+
+  // Jika sebelumnya ada sisa dataset demo sample bawaan, bersihkan agar awal masuk kosong
+  for (const email of Object.keys(userDatasets)) {
+    const ds = userDatasets[email];
+    if (ds && ds.is_sample) {
+      ds.accounts = [];
+      ds.strategies = [];
+      ds.trades = [];
+      ds.journals = [];
+      ds.is_sample = false;
+    }
   }
 
   return {
@@ -184,7 +196,7 @@ export async function getActiveUserEmail(): Promise<string> {
   return "marimasmangga21@gmail.com";
 }
 
-/** Ambil dataset spesifik milik user tertentu */
+/** Ambil dataset spesifik milik user tertentu (KOSONG MURNI untuk semua akun baru) */
 export function getUserDataset(db: Database, email?: string): UserDataset {
   const normEmail = (email || "").trim().toLowerCase() || "marimasmangga21@gmail.com";
 
@@ -196,33 +208,12 @@ export function getUserDataset(db: Database, email?: string): UserDataset {
     return db.user_datasets[normEmail];
   }
 
-  // Jika owner: gunakan data demo awal
-  if (normEmail === "marimasmangga21@gmail.com") {
-    const ownerDs: UserDataset = {
-      is_sample: true,
-      profile: {
-        ...demoProfile,
-        name: "Evan Mita",
-        email: "marimasmangga21@gmail.com",
-        avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
-      },
-      accounts: demoAccounts.map((a) => ({ ...a })),
-      strategies: demoStrategies.map((s) => ({ ...s })),
-      trades: demoTrades.map((t) => ({ ...t })),
-      journals: demoJournals.map((j) => ({ ...j })),
-      emotions: demoEmotions.map((e) => ({ ...e })),
-      screenshots: [],
-    };
-    db.user_datasets[normEmail] = ownerDs;
-    return ownerDs;
-  }
-
-  // Untuk akun lain / baru: data KOSONG MURNI
+  // Semua akun baru (termasuk owner saat awal) dimulai dari data KOSONG MURNI
   const newDataset: UserDataset = {
     is_sample: false,
     profile: {
       ...demoProfile,
-      name: normEmail.split("@")[0] || "Trader",
+      name: normEmail === "marimasmangga21@gmail.com" ? "Evan Mita" : normEmail.split("@")[0] || "Trader",
       email: normEmail,
       avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(normEmail)}`,
     },

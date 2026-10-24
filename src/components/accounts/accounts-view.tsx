@@ -55,6 +55,7 @@ import { ConnectMt5Dialog } from "@/components/accounts/connect-mt5-dialog";
 import { deleteAccount, setAccountArchived, setAccountStatus } from "@/app/actions/accounts";
 import { formatPercent, formatSignedCurrency, pnlColor } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Account } from "@/lib/types";
 
 const STATUS_CONFIG = {
   active: {
@@ -116,10 +117,17 @@ function MiniSparkline({ values, positive }: { values: number[]; positive: boole
   );
 }
 
-export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
+export function AccountsView({
+  hideAmounts,
+  initialAccounts,
+}: {
+  hideAmounts: boolean;
+  initialAccounts?: Account[];
+}) {
   const { t } = useI18n();
-  const { accounts, trades, strategies, syncMt5, syncingMt5 } = useData();
+  const { accounts: contextAccounts, trades, strategies, syncMt5, syncingMt5 } = useData();
   const router = useRouter();
+  const accounts = initialAccounts ?? contextAccounts;
 
   const statsByStrategy = React.useMemo(() => {
     const map = new Map<string, { winRate: number; profitFactor: number; totalTrades: number }>();
@@ -250,51 +258,85 @@ export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
                 ? "$ ••••••"
                 : Array.from(totalSummary.equities.entries())
                     .map(([cur, val]) => formatSignedCurrency(val, cur as never))
-                    .join(" · ") || "$2,767.00"}
+                    .join(" · ") || "$0.00"}
             </p>
           </div>
 
-          {/* Cards Akun Individual */}
-          {accounts.map((acc) => {
-            const stat = statsByAccount.get(acc.id);
-            const equity = stat?.equity ?? acc.initial_balance ?? 50000;
-            const pnl = stat?.netPnl ?? 1240;
-            const isProfit = pnl >= 0;
-
-            return (
-              <div key={acc.id} className="mobile-card p-4 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-[#a1a1aa]">{acc.name}</span>
-                  <Wallet className="h-3.5 w-3.5 text-[#71717a] stroke-[1.5]" />
-                </div>
-
-                <div className="flex items-baseline gap-2">
-                  <span className="font-mono text-xl font-bold text-white">
-                    {hideAmounts ? "$ •••" : `$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-                  </span>
-                  <span className={cn("font-mono text-xs font-bold", isProfit ? "text-[#b2ff05]" : "text-[#ef4444]")}>
-                    ({isProfit ? "+" : ""}${Math.abs(pnl).toLocaleString("en-US", { minimumFractionDigits: 2 })})
-                  </span>
-                </div>
-
-                {/* Progress bar neon lime */}
-                <div className="space-y-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                    <div
-                      className="h-full rounded-full bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]"
-                      style={{
-                        width: `${Math.min(100, Math.max(10, ((equity) / (acc.initial_balance || 10000)) * 100))}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-[#71717a]">
-                    <span>Initial: ${acc.initial_balance.toLocaleString()}</span>
-                    <span>Equity: ${equity.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
-                  </div>
-                </div>
+          {/* Cards Akun Individual atau Empty State */}
+          {accounts.length === 0 ? (
+            <div className="mobile-card p-6 text-center space-y-3">
+              <div className="mx-auto w-10 h-10 rounded-full bg-[#b2ff05]/10 border border-[#b2ff05]/20 flex items-center justify-center text-[#b2ff05]">
+                <Wallet className="h-5 w-5" />
               </div>
-            );
-          })}
+              <div>
+                <h3 className="text-sm font-bold text-white">Belum Ada Akun Trading</h3>
+                <p className="text-xs text-[#8e8e93] mt-1 max-w-xs mx-auto">
+                  Tambahkan akun trading pertama Anda (Live, Demo, atau Prop Firm) untuk mulai mencatat posisi.
+                </p>
+              </div>
+              <Button
+                className="gap-1.5 bg-[#b2ff05] text-black font-bold hover:bg-[#9fe000] rounded-xl h-9 px-4 text-xs shadow-[0_0_15px_rgba(178,255,5,0.25)] mx-auto"
+                onClick={() => {
+                  setEditing(null);
+                  setFormOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 stroke-[2.5]" />
+                <span>Tambah Akun Baru</span>
+              </Button>
+            </div>
+          ) : (
+            accounts.map((acc) => {
+              const stat = statsByAccount.get(acc.id);
+              const equity = stat?.equity ?? acc.initial_balance ?? 0;
+              const pnl = stat?.netPnl ?? 0;
+              const isProfit = pnl >= 0;
+
+              return (
+                <div key={acc.id} className="mobile-card p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#a1a1aa]">{acc.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(acc.id);
+                        setFormOpen(true);
+                      }}
+                      className="p-1 text-[#71717a] hover:text-[#b2ff05] transition-colors"
+                      title="Edit Akun"
+                    >
+                      <Pencil className="h-3.5 w-3.5 stroke-[1.5]" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-xl font-bold text-white">
+                      {hideAmounts ? "$ •••" : `$${equity.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+                    </span>
+                    <span className={cn("font-mono text-xs font-bold", isProfit ? "text-[#b2ff05]" : "text-[#ef4444]")}>
+                      ({isProfit ? "+" : ""}${Math.abs(pnl).toLocaleString("en-US", { minimumFractionDigits: 2 })})
+                    </span>
+                  </div>
+
+                  {/* Progress bar neon lime */}
+                  <div className="space-y-1">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                      <div
+                        className="h-full rounded-full bg-[#b2ff05] shadow-[0_0_8px_#b2ff05]"
+                        style={{
+                          width: `${Math.min(100, Math.max(5, ((equity) / (acc.initial_balance || 1)) * 100))}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-[#71717a]">
+                      <span>Initial: ${(acc.initial_balance ?? 0).toLocaleString()}</span>
+                      <span>Equity: ${equity.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Section Strategies di Mobile */}
@@ -475,7 +517,7 @@ export function AccountsView({ hideAmounts }: { hideAmounts: boolean }) {
               account.max_drawdown && account.max_drawdown > 0 && stat && stat.netPnl < 0
                 ? Math.min(100, (Math.abs(stat.netPnl) / account.max_drawdown) * 100)
                 : 0;
-            const status = STATUS_CONFIG[account.status];
+            const status = STATUS_CONFIG[account.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.active;
             const StatusIcon = status.icon;
 
             const accountTrades = trades

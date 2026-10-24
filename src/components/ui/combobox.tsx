@@ -38,7 +38,7 @@ export function Combobox({
         value={value}
         onChange={(e) => onChange(e.target.value.toUpperCase())}
         placeholder={placeholder}
-        className={cn("font-mono uppercase tracking-tight", className)}
+        className={cn("font-mono uppercase tracking-tight text-[#f4f4f5]", className)}
         list={listId}
         autoComplete="off"
         autoFocus={autoFocus}

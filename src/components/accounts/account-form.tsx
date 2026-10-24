@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { useData } from "@/components/providers/data-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,6 +51,7 @@ export function AccountForm({
 }) {
   const { t } = useI18n();
   const router = useRouter();
+  const { refresh } = useData();
   const [submitting, setSubmitting] = React.useState(false);
   const isEdit = Boolean(account);
 
@@ -97,6 +99,7 @@ export function AccountForm({
       }
 
       toast.success(isEdit ? t("accounts.saved") : t("accounts.saved"));
+      await refresh();
       router.refresh();
       onDone?.();
     } finally {
