@@ -13,7 +13,7 @@ import {
   Clock,
   Loader2,
   Save,
-  Sparkles,
+  Calculator,
 } from "lucide-react";
 import { z } from "zod";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -746,10 +746,11 @@ export function TradeForm({
                   <button
                     type="button"
                     onClick={suggestPnl}
-                    className="text-[10px] font-normal text-primary hover:underline"
+                    className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-400 hover:text-white"
                     title={t("trades.quickFill")}
                   >
-                    <Sparkles className="inline h-2.5 w-2.5" /> {t("trades.quickFill")}
+                    <Calculator className="h-2.5 w-2.5" />
+                    <span>{t("trades.quickFill")}</span>
                   </button>
                 </Label>
                 <Input

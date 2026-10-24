@@ -11,7 +11,7 @@ import {
   NotebookPen,
   Pencil,
   Plus,
-  Sparkles,
+  BookOpen,
   Trash2,
   TrendingDown,
   TrendingUp,
@@ -419,7 +419,7 @@ export function JournalView({ hideAmounts }: { hideAmounts: boolean }) {
             <div className="pt-3">
               {emotionStats.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-[#222228] py-8 text-center bg-[#0c0c0e]">
-                  <Sparkles className="mx-auto h-5 w-5 text-[#71717a]" />
+                  <BookOpen className="mx-auto h-5 w-5 text-[#71717a]" />
                   <p className="mt-2 px-4 text-xs leading-relaxed text-[#71717a]">
                     {t("journal.noStats")}
                   </p>

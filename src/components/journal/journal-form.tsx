@@ -395,7 +395,7 @@ export function EmotionDialog({
             </div>
           </div>
           <Button onClick={() => void handleCreate()} disabled={submitting || !name.trim()} className="w-full">
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             {t("common.save")}
           </Button>
         </div>
