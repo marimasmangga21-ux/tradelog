@@ -113,9 +113,7 @@ async function persist(db: Database): Promise<void> {
   memoryDb = db;
   try {
     await ensureDirs();
-    const tmp = `${DB_FILE}.${process.pid}.${Date.now()}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
-    await fs.rename(tmp, DB_FILE);
+    await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), "utf8");
   } catch (err) {
     console.warn("Filesystem write warning:", err);
   }
