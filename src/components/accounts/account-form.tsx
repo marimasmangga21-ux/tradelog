@@ -35,12 +35,38 @@ const schema = z.object({
   initial_balance: z.string(),
   status: z.enum(["active", "breached", "passed", "archived"]),
   profit_target: z.string(),
-  max_drawdown: z.string(),
   color: z.string(),
   notes: z.string(),
 });
 
 type FormValues = z.infer<typeof schema>;
+
+function parseAmount(val: string): number {
+  if (!val) return 0;
+  const cleaned = val.replace(/[^0-9.,-]/g, "").trim();
+  if (!cleaned) return 0;
+
+  if (cleaned.includes(".") && cleaned.includes(",")) {
+    const lastDot = cleaned.lastIndexOf(".");
+    const lastComma = cleaned.lastIndexOf(",");
+    if (lastComma > lastDot) {
+      return Number(cleaned.replace(/\./g, "").replace(",", ".")) || 0;
+    } else {
+      return Number(cleaned.replace(/,/g, "")) || 0;
+    }
+  }
+
+  if (cleaned.includes(",")) {
+    const parts = cleaned.split(",");
+    if (parts.length === 2 && parts[1].length === 3) {
+      return Number(cleaned.replace(/,/g, "")) || 0;
+    }
+    return Number(cleaned.replace(",", ".")) || 0;
+  }
+
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
 
 export function AccountForm({
   account,
@@ -51,7 +77,7 @@ export function AccountForm({
 }) {
   const { t } = useI18n();
   const router = useRouter();
-  const { refresh } = useData();
+  const { refresh, addOrUpdateAccount } = useData();
   const [submitting, setSubmitting] = React.useState(false);
   const isEdit = Boolean(account);
 
@@ -65,7 +91,6 @@ export function AccountForm({
       initial_balance: account?.initial_balance?.toString() ?? "",
       status: account?.status ?? "active",
       profit_target: account?.profit_target?.toString() ?? "",
-      max_drawdown: account?.max_drawdown?.toString() ?? "",
       color: account?.color ?? ACCOUNT_COLORS[0],
       notes: account?.notes ?? "",
     },
@@ -83,10 +108,10 @@ export function AccountForm({
         broker: data.broker || null,
         account_type: data.account_type,
         currency: data.currency,
-        initial_balance: data.initial_balance ? Number(data.initial_balance.replace(",", ".")) : 0,
+        initial_balance: parseAmount(data.initial_balance),
         status: data.status,
-        profit_target: data.profit_target ? Number(data.profit_target.replace(",", ".")) : null,
-        max_drawdown: data.max_drawdown ? Number(data.max_drawdown.replace(",", ".")) : null,
+        profit_target: data.profit_target ? parseAmount(data.profit_target) : null,
+        max_drawdown: null,
         color: data.color,
         notes: data.notes || null,
       };
@@ -96,6 +121,10 @@ export function AccountForm({
       if (!result.ok) {
         toast.error(t("common.error"), { description: result.error });
         return;
+      }
+
+      if (result.data) {
+        addOrUpdateAccount(result.data);
       }
 
       toast.success(isEdit ? t("accounts.saved") : t("accounts.saved"));
@@ -211,24 +240,13 @@ export function AccountForm({
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="profit_target">{t("accounts.profitTarget")}</Label>
           <Input
             id="profit_target"
             inputMode="decimal"
             placeholder="10000"
             {...register("profit_target")}
-            className="tabular font-mono"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="max_drawdown">{t("accounts.maxDrawdown")}</Label>
-          <Input
-            id="max_drawdown"
-            inputMode="decimal"
-            placeholder="10000"
-            {...register("max_drawdown")}
             className="tabular font-mono"
           />
         </div>

@@ -15,6 +15,8 @@ interface DataContextValue {
   refresh: () => Promise<void>;
   syncMt5: (showToast?: boolean) => Promise<boolean>;
   logout: () => Promise<void>;
+  addOrUpdateAccount: (account: Account) => void;
+  deleteAccountFromState: (id: string) => void;
 }
 
 const DataContext = React.createContext<DataContextValue | null>(null);
@@ -45,12 +47,40 @@ export function DataProvider({
   const [loading, setLoading] = React.useState(false);
   const [syncingMt5, setSyncingMt5] = React.useState(false);
 
+  // Load from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem("tradelog_accounts");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAccounts((prev) => {
+            if (!prev || prev.length === 0) return parsed;
+            const map = new Map<string, Account>();
+            for (const a of parsed) map.set(a.id, a);
+            for (const a of prev) map.set(a.id, a);
+            return Array.from(map.values());
+          });
+        }
+      }
+    } catch {}
+  }, []);
+
   React.useEffect(() => {
     if (initialProfile) setProfile(initialProfile);
   }, [initialProfile]);
   React.useEffect(() => {
     if (initialAccounts && initialAccounts.length > 0) {
-      setAccounts(initialAccounts);
+      setAccounts((prev) => {
+        const map = new Map<string, Account>();
+        for (const a of initialAccounts) map.set(a.id, a);
+        for (const a of prev) map.set(a.id, a);
+        const merged = Array.from(map.values());
+        try {
+          localStorage.setItem("tradelog_accounts", JSON.stringify(merged));
+        } catch {}
+        return merged;
+      });
     }
   }, [initialAccounts]);
   React.useEffect(() => {
@@ -74,6 +104,27 @@ export function DataProvider({
     }
   }, [initialEmotions]);
 
+  const addOrUpdateAccount = React.useCallback((account: Account) => {
+    setAccounts((prev) => {
+      const filtered = prev.filter((a) => a.id !== account.id);
+      const next = [account, ...filtered];
+      try {
+        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const deleteAccountFromState = React.useCallback((id: string) => {
+    setAccounts((prev) => {
+      const next = prev.filter((a) => a.id !== id);
+      try {
+        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   const refresh = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -88,11 +139,34 @@ export function DataProvider({
           emotions: Emotion[];
         };
         if (data.profile) setProfile(data.profile);
-        setAccounts(data.accounts);
-        setStrategies(data.strategies);
-        setTrades(data.trades);
-        setJournals(data.journals);
-        setEmotions(data.emotions);
+        
+        // Merge accounts safely without wiping local state
+        setAccounts((prev) => {
+          if (data.accounts && data.accounts.length > 0) {
+            const map = new Map<string, Account>();
+            for (const a of prev) map.set(a.id, a);
+            for (const a of data.accounts) map.set(a.id, a);
+            const merged = Array.from(map.values());
+            try {
+              localStorage.setItem("tradelog_accounts", JSON.stringify(merged));
+            } catch {}
+            return merged;
+          }
+          // If server returns empty array but local has accounts, preserve local and sync to server
+          if (prev.length > 0) {
+            fetch("/api/data", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ accounts: prev }),
+            }).catch(() => {});
+          }
+          return prev;
+        });
+
+        if (data.strategies && data.strategies.length > 0) setStrategies(data.strategies);
+        if (data.trades && data.trades.length > 0) setTrades(data.trades);
+        if (data.journals && data.journals.length > 0) setJournals(data.journals);
+        if (data.emotions && data.emotions.length > 0) setEmotions(data.emotions);
       }
     } catch {
       // diamkan
@@ -144,8 +218,24 @@ export function DataProvider({
       refresh,
       syncMt5,
       logout,
+      addOrUpdateAccount,
+      deleteAccountFromState,
     }),
-    [profile, accounts, strategies, trades, journals, emotions, loading, syncingMt5, refresh, syncMt5, logout],
+    [
+      profile,
+      accounts,
+      strategies,
+      trades,
+      journals,
+      emotions,
+      loading,
+      syncingMt5,
+      refresh,
+      syncMt5,
+      logout,
+      addOrUpdateAccount,
+      deleteAccountFromState,
+    ],
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

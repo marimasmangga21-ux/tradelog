@@ -125,7 +125,14 @@ export function AccountsView({
   initialAccounts?: Account[];
 }) {
   const { t } = useI18n();
-  const { accounts: contextAccounts, trades, strategies, syncMt5, syncingMt5 } = useData();
+  const {
+    accounts: contextAccounts,
+    trades,
+    strategies,
+    syncMt5,
+    syncingMt5,
+    deleteAccountFromState,
+  } = useData();
   const router = useRouter();
   const accounts = contextAccounts.length > 0 ? contextAccounts : (initialAccounts ?? contextAccounts);
 
@@ -203,8 +210,10 @@ export function AccountsView({
 
   async function handleDelete() {
     if (!deleteTarget) return;
-    const result = await deleteAccount(deleteTarget);
+    const targetId = deleteTarget;
+    deleteAccountFromState(targetId);
     setDeleteTarget(null);
+    const result = await deleteAccount(targetId);
     if (!result.ok) {
       toast.error(t("common.error"), { description: result.error });
       return;
@@ -513,10 +522,6 @@ export function AccountsView({
               account.profit_target && account.profit_target > 0 && stat
                 ? Math.max(0, Math.min(100, (stat.netPnl / account.profit_target) * 100))
                 : null;
-            const ddUsed =
-              account.max_drawdown && account.max_drawdown > 0 && stat && stat.netPnl < 0
-                ? Math.min(100, (Math.abs(stat.netPnl) / account.max_drawdown) * 100)
-                : 0;
             const status = STATUS_CONFIG[account.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.active;
             const StatusIcon = status.icon;
 
@@ -691,20 +696,6 @@ export function AccountsView({
                         <span className="tabular font-mono">{targetProgress.toFixed(0)}%</span>
                       </div>
                       <Progress value={targetProgress} className="h-1" />
-                    </div>
-                  )}
-
-                  {ddUsed > 0 && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] text-muted-foreground">
-                        <span>{t("accounts.drawdownUsed")}</span>
-                        <span className="tabular font-mono text-loss">{ddUsed.toFixed(0)}%</span>
-                      </div>
-                      <Progress
-                        value={ddUsed}
-                        className="h-1"
-                        indicatorClassName={ddUsed > 70 ? "bg-loss" : "bg-warning"}
-                      />
                     </div>
                   )}
                 </div>
