@@ -99,9 +99,13 @@ export function AccountForm({
       }
 
       toast.success(isEdit ? t("accounts.saved") : t("accounts.saved"));
+      onDone?.();
       await refresh();
       router.refresh();
-      onDone?.();
+    } catch (err) {
+      toast.error(t("common.error"), {
+        description: err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan akun.",
+      });
     } finally {
       setSubmitting(false);
     }

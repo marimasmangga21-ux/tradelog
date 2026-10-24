@@ -40,6 +40,7 @@ export async function createAccount(raw: unknown): Promise<ActionResult<Account>
     });
 
     revalidatePath("/accounts");
+    revalidatePath("/dashboard");
     revalidatePath("/");
     revalidatePath("/trades");
     return { ok: true, data: account };
@@ -109,6 +110,7 @@ export async function deleteAccount(id: string): Promise<ActionResult> {
     if (!ok) return { ok: false, error: "Akun tidak ditemukan" };
 
     revalidatePath("/accounts");
+    revalidatePath("/dashboard");
     revalidatePath("/");
     revalidatePath("/trades");
     return { ok: true };

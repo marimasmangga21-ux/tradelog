@@ -127,7 +127,7 @@ export function AccountsView({
   const { t } = useI18n();
   const { accounts: contextAccounts, trades, strategies, syncMt5, syncingMt5 } = useData();
   const router = useRouter();
-  const accounts = initialAccounts ?? contextAccounts;
+  const accounts = contextAccounts.length > 0 ? contextAccounts : (initialAccounts ?? contextAccounts);
 
   const statsByStrategy = React.useMemo(() => {
     const map = new Map<string, { winRate: number; profitFactor: number; totalTrades: number }>();

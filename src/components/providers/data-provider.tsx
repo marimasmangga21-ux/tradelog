@@ -48,11 +48,31 @@ export function DataProvider({
   React.useEffect(() => {
     if (initialProfile) setProfile(initialProfile);
   }, [initialProfile]);
-  React.useEffect(() => setAccounts(initialAccounts), [initialAccounts]);
-  React.useEffect(() => setStrategies(initialStrategies), [initialStrategies]);
-  React.useEffect(() => setTrades(initialTrades), [initialTrades]);
-  React.useEffect(() => setJournals(initialJournals), [initialJournals]);
-  React.useEffect(() => setEmotions(initialEmotions), [initialEmotions]);
+  React.useEffect(() => {
+    if (initialAccounts && initialAccounts.length > 0) {
+      setAccounts(initialAccounts);
+    }
+  }, [initialAccounts]);
+  React.useEffect(() => {
+    if (initialStrategies && initialStrategies.length > 0) {
+      setStrategies(initialStrategies);
+    }
+  }, [initialStrategies]);
+  React.useEffect(() => {
+    if (initialTrades && initialTrades.length > 0) {
+      setTrades(initialTrades);
+    }
+  }, [initialTrades]);
+  React.useEffect(() => {
+    if (initialJournals && initialJournals.length > 0) {
+      setJournals(initialJournals);
+    }
+  }, [initialJournals]);
+  React.useEffect(() => {
+    if (initialEmotions && initialEmotions.length > 0) {
+      setEmotions(initialEmotions);
+    }
+  }, [initialEmotions]);
 
   const refresh = React.useCallback(async () => {
     setLoading(true);
