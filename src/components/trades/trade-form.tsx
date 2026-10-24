@@ -150,7 +150,7 @@ export function TradeForm({
     duration: "SCALP" as "SCALP" | "INTRA" | "SWING",
     confluenceReason: "",
     preEmotion: "Tenang & Disiplin",
-    tradeResult: ((trade?.pnl ?? 0) >= 0 ? "LABA" : "RUGI") as "LABA" | "RUGI",
+    tradeResult: ((trade?.pnl ?? 0) > 0 ? "LABA" : (trade?.pnl ?? 0) < 0 ? "RUGI" : "BREAKEVEN") as "LABA" | "RUGI" | "BREAKEVEN",
     exitReasonType: (trade?.exit_reason || "TP") as "TP" | "SL" | "BE" | "MANUAL",
     postEmotion: "Puas & Belajar",
     improvementType: "TEKNIS" as "TEKNIS" | "MANUSIA" | "LANJUTAN",
@@ -304,7 +304,7 @@ export function TradeForm({
             trade_id: tradeId,
             journal_date: data.traded_at.slice(0, 10),
             title: journalTitle,
-            mood_score: journalFlow.tradeResult === "LABA" ? 4 : 2,
+            mood_score: journalFlow.tradeResult === "LABA" ? 4 : journalFlow.tradeResult === "BREAKEVEN" ? 3 : 2,
             emotion_ids: existingJournal?.emotion_ids ?? [],
             lesson_learned: `[${journalFlow.improvementType}] ${journalFlow.improvementNote || journalFlow.postEmotion}`,
             mistakes: journalFlow.tradeResult === "RUGI" ? journalFlow.confluenceReason || null : null,
@@ -596,7 +596,34 @@ export function TradeForm({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="exit_price">{t("trades.exit")}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="exit_price">{t("trades.exit")}</Label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const entry = values.entry_price;
+                        if (entry) setValue("exit_price", entry);
+                        setValue("pnl", "0.00");
+                        setValue("r_multiple", "0.00");
+                        setValue("status", "closed");
+                        setValue("exit_reason", "BE");
+                        setJournalFlow((prev) => ({
+                          ...prev,
+                          tradeResult: "BREAKEVEN",
+                          exitReasonType: "BE",
+                        }));
+                        toast.info("Posisi ditutup Breakeven (BE)", {
+                          description: entry
+                            ? `Exit disamakan dengan entry (${entry}) & PnL diatur ke $0.00`
+                            : "PnL diatur ke $0.00 (Impas)",
+                        });
+                      }}
+                      className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1"
+                      title="Set Exit sama dengan Entry (Breakeven / Impas)"
+                    >
+                      <span>⚡ Set BE</span>
+                    </button>
+                  </div>
                   <Input
                     id="exit_price"
                     inputMode="decimal"
@@ -687,19 +714,27 @@ export function TradeForm({
                         setValue("status", "closed");
                         const current = num(values.pnl);
                         setValue("pnl", String(Math.abs(current && current !== 0 ? current : risk * 2)));
+                        setJournalFlow((prev) => ({ ...prev, tradeResult: "LABA" }));
                       } else if (val === "loss") {
                         setValue("status", "closed");
                         const current = num(values.pnl);
                         setValue("pnl", String(-Math.abs(current && current !== 0 ? current : risk)));
+                        setJournalFlow((prev) => ({ ...prev, tradeResult: "RUGI" }));
                       } else if (val === "breakeven") {
                         setValue("status", "closed");
                         setValue("pnl", "0.00");
+                        setValue("r_multiple", "0.00");
+                        if (values.entry_price && !values.exit_price) {
+                          setValue("exit_price", values.entry_price);
+                        }
+                        setValue("exit_reason", "BE");
+                        setJournalFlow((prev) => ({ ...prev, tradeResult: "BREAKEVEN", exitReasonType: "BE" }));
                       }
                     }}
                     options={[
                       { value: "win", label: "Win" },
                       { value: "loss", label: "Loss" },
-                      { value: "breakeven", label: "BE" },
+                      { value: "breakeven", label: "BE (Impas)" },
                     ]}
                   />
                 </div>
@@ -847,21 +882,48 @@ export function TradeForm({
                 <div className="space-y-1.5">
                   <Label className="text-xs text-[#a1a1aa]">5. Hasil Perdagangan</Label>
                   <div className="flex gap-2">
-                    {(["LABA", "RUGI"] as const).map((res) => (
+                    {(["LABA", "RUGI", "BREAKEVEN"] as const).map((res) => (
                       <button
                         key={res}
                         type="button"
-                        onClick={() => setJournalFlow((prev) => ({ ...prev, tradeResult: res }))}
+                        onClick={() => {
+                          setJournalFlow((prev) => ({
+                            ...prev,
+                            tradeResult: res,
+                            ...(res === "BREAKEVEN" ? { exitReasonType: "BE" } : {}),
+                          }));
+                          if (res === "BREAKEVEN") {
+                            setValue("status", "closed");
+                            setValue("pnl", "0.00");
+                            setValue("r_multiple", "0.00");
+                            setValue("exit_reason", "BE");
+                            if (values.entry_price && !values.exit_price) {
+                              setValue("exit_price", values.entry_price);
+                            }
+                          } else if (res === "LABA") {
+                            setValue("status", "closed");
+                            const current = num(values.pnl);
+                            const risk = num(values.risk_amount) ?? suggestedRisk ?? 100;
+                            setValue("pnl", String(Math.abs(current && current !== 0 ? current : risk * 2)));
+                          } else if (res === "RUGI") {
+                            setValue("status", "closed");
+                            const current = num(values.pnl);
+                            const risk = num(values.risk_amount) ?? suggestedRisk ?? 100;
+                            setValue("pnl", String(-Math.abs(current && current !== 0 ? current : risk)));
+                          }
+                        }}
                         className={cn(
                           "flex-1 rounded-lg py-2 text-xs font-bold border transition-all",
                           journalFlow.tradeResult === res
                             ? res === "LABA"
                               ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50"
-                              : "bg-red-500/20 text-red-400 border-red-500/50"
+                              : res === "RUGI"
+                              ? "bg-red-500/20 text-red-400 border-red-500/50"
+                              : "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
                             : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
-                        {res}
+                        {res === "BREAKEVEN" ? "BE (IMPAS)" : res}
                       </button>
                     ))}
                   </div>
@@ -875,17 +937,31 @@ export function TradeForm({
                         key={r}
                         type="button"
                         onClick={() => {
-                          setJournalFlow((prev) => ({ ...prev, exitReasonType: r }));
+                          setJournalFlow((prev) => ({
+                            ...prev,
+                            exitReasonType: r,
+                            ...(r === "BE" ? { tradeResult: "BREAKEVEN" } : {}),
+                          }));
                           setValue("exit_reason", r);
+                          if (r === "BE") {
+                            setValue("status", "closed");
+                            setValue("pnl", "0.00");
+                            setValue("r_multiple", "0.00");
+                            if (values.entry_price && !values.exit_price) {
+                              setValue("exit_price", values.entry_price);
+                            }
+                          }
                         }}
                         className={cn(
                           "flex-1 rounded-lg py-2 text-[11px] font-bold border transition-all",
                           journalFlow.exitReasonType === r
-                            ? "bg-[#b2ff05]/20 text-[#b2ff05] border-[#b2ff05]/50"
+                            ? r === "BE"
+                              ? "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_8px_rgba(245,158,11,0.2)]"
+                              : "bg-[#b2ff05]/20 text-[#b2ff05] border-[#b2ff05]/50"
                             : "border-[#222228] bg-[#0c0c0e] text-[#71717a] hover:border-[#b2ff05]/40 hover:text-white"
                         )}
                       >
-                        {r}
+                        {r === "BE" ? "BE (Breakeven)" : r}
                       </button>
                     ))}
                   </div>

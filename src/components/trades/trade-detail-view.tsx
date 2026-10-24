@@ -11,6 +11,7 @@ import {
   Maximize2,
   Pencil,
   Share2,
+  Shield,
   Target,
   Trash2,
   TrendingDown,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { useData } from "@/components/providers/data-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ResultBadge, DirectionBadge, InstrumentBadge } from "@/components/shared/result-badge";
 import { TradeSnapshotDialog } from "@/components/snapshot/trade-snapshot-dialog";
-import { deleteTrade, assignTradeStrategy } from "@/app/actions/trades";
+import { deleteTrade, assignTradeStrategy, closeTrade } from "@/app/actions/trades";
 import {
   Select,
   SelectContent,
@@ -80,12 +82,38 @@ export function TradeDetailView({
   hideAmounts: boolean;
 }) {
   const { t, locale } = useI18n();
+  const { refresh } = useData();
   const router = useRouter();
   const [deleting, setDeleting] = React.useState(false);
+  const [closingBe, setClosingBe] = React.useState(false);
   const [zoom, setZoom] = React.useState<{ url: string; label: string } | null>(null);
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const [selectedStrategyId, setSelectedStrategyId] = React.useState<string | null>(trade.strategy_id);
   const [isUpdatingStrategy, setIsUpdatingStrategy] = React.useState(false);
+
+  const handleCloseBreakeven = async () => {
+    setClosingBe(true);
+    try {
+      const res = await closeTrade(trade.id, {
+        exit_price: trade.entry_price ?? null,
+        pnl: 0,
+        exit_reason: "BE",
+      });
+      if (res.ok) {
+        toast.success("Posisi Berhasil Ditutup Breakeven (BE)", {
+          description: `Harga exit: ${trade.entry_price ?? "—"} · PnL: $0.00 (Impas)`,
+        });
+        await refresh();
+        router.refresh();
+      } else {
+        toast.error(res.error || "Gagal menutup trade");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan saat menutup trade");
+    } finally {
+      setClosingBe(false);
+    }
+  };
 
   const activeStrategy = strategies.find((s) => s.id === selectedStrategyId) ?? strategy;
 
@@ -203,6 +231,18 @@ export function TradeDetailView({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {isOpen && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCloseBreakeven}
+              disabled={closingBe}
+              className="gap-1.5 border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span>{closingBe ? "Menutup..." : "Tutup BE"}</span>
+            </Button>
+          )}
           <TradeSnapshotDialog trade={trade} account={account} hideAmounts={hideAmounts}>
             <Button variant="outline" size="sm" className="gap-1.5">
               <Share2 className="h-3.5 w-3.5" />
@@ -236,6 +276,44 @@ export function TradeDetailView({
           </AlertDialog>
         </div>
       </div>
+
+      {/* Banner Tutup Breakeven jika Posisi Masih Open */}
+      {isOpen && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-200">
+          <div className="flex items-center gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">Posisi Ini Sedang Berjalan (OPEN)</p>
+              <p className="text-xs text-amber-300/80 mt-0.5">
+                Tutup seketika pada level Breakeven (Exit = Entry, PnL = $0.00) atau sesuaikan harga di edit posisi.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <Button
+              size="sm"
+              onClick={handleCloseBreakeven}
+              disabled={closingBe}
+              className="h-9 gap-1.5 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)] text-xs"
+            >
+              <Shield className="h-4 w-4" />
+              <span>{closingBe ? "Memproses..." : "Tutup Posisi Breakeven (BE)"}</span>
+            </Button>
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="h-9 text-xs rounded-xl border-amber-500/30 bg-transparent text-amber-200 hover:bg-amber-500/20"
+            >
+              <Link href={`/trades/${trade.id}/edit`}>
+                Edit Posisi
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* PnL hero */}
       <Card
