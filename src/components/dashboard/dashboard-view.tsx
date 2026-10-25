@@ -89,15 +89,18 @@ export function DashboardView({
     return streak;
   }, [closedTrades]);
 
-  // Data kurva saldo
+  // Data kurva saldo (diurutkan kronologis dari trade tertua ke terbaru)
   const chartData = React.useMemo(() => {
     let running = totalDeposit;
     const pts = [{ date: "Start", balance: running }];
-    closedTrades.slice(-20).forEach((t) => {
+    const chronological = [...closedTrades].sort(
+      (a, b) => new Date(a.traded_at).getTime() - new Date(b.traded_at).getTime(),
+    );
+    chronological.slice(-30).forEach((t) => {
       running += t.pnl || 0;
       pts.push({
         date: new Date(t.traded_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        balance: running,
+        balance: Number(running.toFixed(2)),
       });
     });
     if (pts.length <= 1) {
@@ -109,7 +112,7 @@ export function DashboardView({
       }
       return [
         { date: "Start", balance: totalDeposit },
-        { date: "Now", balance: running },
+        { date: "Now", balance: Number(running.toFixed(2)) },
       ];
     }
     return pts;
@@ -126,8 +129,8 @@ export function DashboardView({
 
   return (
     <div className="w-full">
-      {/* Onboarding Stepper Guide */}
-      {(trades.length === 0 || accounts.length === 0 || isSample) && (
+      {/* Onboarding Stepper Guide: Hanya muncul ketika akun baru (belum memiliki akun trading sama sekali) */}
+      {accounts.length === 0 && (
         <OnboardingGuide
           hasAccounts={accounts.length > 0}
           hasStrategies={strategies.length > 0}

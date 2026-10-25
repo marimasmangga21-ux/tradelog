@@ -283,7 +283,7 @@ export function recalcBalances(db: Database & Partial<UserDataset>, accountId: s
   let balance = account.initial_balance;
   for (const trade of list) {
     if (trade.status === "closed") {
-      balance += trade.pnl - (trade.fees ?? 0);
+      balance += (trade.pnl ?? 0);
       trade.balance_after = Number(balance.toFixed(2));
     } else {
       trade.balance_after = Number(balance.toFixed(2));

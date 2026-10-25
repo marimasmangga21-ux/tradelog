@@ -5,7 +5,7 @@ import urllib.request
 import os
 import sys
 
-API_URL = "http://localhost:3000/api/mt5/ingest"
+API_URL = os.environ.get("TRADELOG_API_URL", "https://tradelogjournal-app.vercel.app/api/mt5/ingest")
 API_SECRET = "tradelog-mt5-secret-key"
 
 def extract_current_account():

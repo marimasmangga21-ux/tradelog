@@ -64,11 +64,12 @@ export async function POST(req: Request) {
     let updatedCount = 0;
     let targetAccountId = "";
 
-    await mutateDb((draft) => {
-      // 1. Temukan atau Buat Akun MT5 yang sesuai
-      let targetAccount = draft.accounts.find(
-        (a: Account) => a.mt5_account_number === account_number || a.name.includes(String(account_number)),
-      );
+    await mutateDb(
+      (draft) => {
+        // 1. Temukan atau Buat Akun MT5 yang sesuai
+        let targetAccount = draft.accounts.find(
+          (a: Account) => a.mt5_account_number === account_number || a.name.includes(String(account_number)),
+        );
 
       const currentTime = nowIso();
 
