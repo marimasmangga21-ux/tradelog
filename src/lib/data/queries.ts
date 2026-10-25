@@ -91,9 +91,7 @@ export async function loadAll(targetEmail?: string) {
     trades: [...ds.trades].sort(
       (a, b) => new Date(b.traded_at).getTime() - new Date(a.traded_at).getTime(),
     ),
-    journals: [...ds.journals].sort(
-      (a, b) => new Date(b.journal_date).getTime() - new Date(a.journal_date).getTime(),
-    ),
+    journals: (await loadJournals()),
     emotions: [...ds.emotions].sort((a, b) => Number(b.is_default) - Number(a.is_default)),
     screenshots: ds.screenshots,
   };
