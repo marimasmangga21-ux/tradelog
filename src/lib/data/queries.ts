@@ -10,6 +10,20 @@ async function loadCurrentDataset() {
 }
 
 export async function loadProfile(): Promise<Profile> {
+  try {
+    const { supabase } = await import("@/lib/supabase");
+    const email = await getActiveUserEmail();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (!error && data) {
+      return data as Profile;
+    }
+  } catch {}
+
   const ds = await loadCurrentDataset();
   return ds.profile;
 }
