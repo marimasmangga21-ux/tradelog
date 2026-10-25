@@ -166,22 +166,47 @@ export function SettingsView({
 
             <Separator />
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="name">{t("settings.name")}</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  onBlur={() => name !== profile.name && void savePreferences({ name })}
-                  placeholder={t("settings.namePlaceholder")}
-                />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void savePreferences({ name });
+              }}
+              className="space-y-4"
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">{t("settings.name")}</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t("settings.namePlaceholder")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="timezone">{t("settings.timezone")}</Label>
+                  <Input id="timezone" value={profile.timezone} readOnly disabled className="opacity-70" />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="timezone">{t("settings.timezone")}</Label>
-                <Input id="timezone" value={profile.timezone} readOnly disabled className="opacity-70" />
+
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={saving || name === profile.name}
+                  className="bg-[#b2ff05] text-black hover:bg-[#b2ff05]/90 font-medium px-4 h-8 text-xs"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Profil"
+                  )}
+                </Button>
               </div>
-            </div>
+            </form>
 
             {profile.memberSince && (
               <p className="text-[11px] text-muted-foreground">
