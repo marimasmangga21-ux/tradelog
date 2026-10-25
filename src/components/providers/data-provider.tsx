@@ -47,87 +47,6 @@ export function DataProvider({
   const [loading, setLoading] = React.useState(false);
   const [syncingMt5, setSyncingMt5] = React.useState(false);
 
-  // Load from localStorage on mount & auto-refresh from server
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem("tradelog_accounts");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setAccounts((prev) => {
-            if (!prev || prev.length === 0) return parsed;
-            const map = new Map<string, Account>();
-            for (const a of parsed) map.set(a.id, a);
-            for (const a of prev) map.set(a.id, a);
-            return Array.from(map.values());
-          });
-        }
-      }
-    } catch {}
-
-    // Selalu sinkronkan data terbaru dari server saat buka halaman
-    refresh();
-  }, [refresh]);
-
-  React.useEffect(() => {
-    if (initialProfile) setProfile(initialProfile);
-  }, [initialProfile]);
-  React.useEffect(() => {
-    if (initialAccounts && initialAccounts.length > 0) {
-      setAccounts((prev) => {
-        const map = new Map<string, Account>();
-        for (const a of initialAccounts) map.set(a.id, a);
-        for (const a of prev) map.set(a.id, a);
-        const merged = Array.from(map.values());
-        try {
-          localStorage.setItem("tradelog_accounts", JSON.stringify(merged));
-        } catch {}
-        return merged;
-      });
-    }
-  }, [initialAccounts]);
-  React.useEffect(() => {
-    if (initialStrategies && initialStrategies.length > 0) {
-      setStrategies(initialStrategies);
-    }
-  }, [initialStrategies]);
-  React.useEffect(() => {
-    if (initialTrades && initialTrades.length > 0) {
-      setTrades(initialTrades);
-    }
-  }, [initialTrades]);
-  React.useEffect(() => {
-    if (initialJournals && initialJournals.length > 0) {
-      setJournals(initialJournals);
-    }
-  }, [initialJournals]);
-  React.useEffect(() => {
-    if (initialEmotions && initialEmotions.length > 0) {
-      setEmotions(initialEmotions);
-    }
-  }, [initialEmotions]);
-
-  const addOrUpdateAccount = React.useCallback((account: Account) => {
-    setAccounts((prev) => {
-      const filtered = prev.filter((a) => a.id !== account.id);
-      const next = [account, ...filtered];
-      try {
-        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  }, []);
-
-  const deleteAccountFromState = React.useCallback((id: string) => {
-    setAccounts((prev) => {
-      const next = prev.filter((a) => a.id !== id);
-      try {
-        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  }, []);
-
   const refresh = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -177,6 +96,28 @@ export function DataProvider({
       setLoading(false);
     }
   }, []);
+
+  // Load from localStorage on mount & auto-refresh from server
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem("tradelog_accounts");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAccounts((prev) => {
+            if (!prev || prev.length === 0) return parsed;
+            const map = new Map<string, Account>();
+            for (const a of parsed) map.set(a.id, a);
+            for (const a of prev) map.set(a.id, a);
+            return Array.from(map.values());
+          });
+        }
+      }
+    } catch {}
+
+    // Selalu sinkronkan data terbaru dari server saat buka halaman
+    refresh();
+  }, [refresh]);
 
   const logout = React.useCallback(async () => {
     try {
