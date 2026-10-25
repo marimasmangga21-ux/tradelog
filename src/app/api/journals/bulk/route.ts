@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mutateDb } from "@/lib/store/db";
+import { supabase } from "@/lib/supabase";
 import type { Journal } from "@/lib/types";
 
 export async function POST(req: Request) {
@@ -10,22 +10,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No journals provided" }, { status: 400 });
     }
 
-    const result = await mutateDb(
-      (draft) => {
-        let added = 0;
-        for (const journal of journals) {
-          const exists = draft.journals.some((j) => j.id === journal.id);
-          if (!exists) {
-            draft.journals.push(journal);
-            added++;
-          }
-        }
-        return { added, total: journals.length };
-      },
-      { targetEmail }
-    );
+    if (!targetEmail) {
+      return NextResponse.json({ ok: false, error: "targetEmail required" }, { status: 400 });
+    }
 
-    return NextResponse.json({ ok: true, ...result });
+    // Upsert ke Supabase journals table
+    const { error } = await supabase
+      .from("journals")
+      .upsert(
+        journals.map(j => ({
+          ...j,
+          user_email: targetEmail
+        })),
+        { onConflict: "id" }
+      );
+
+    if (error) {
+      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, added: journals.length, total: journals.length });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "Failed to import journals" },
