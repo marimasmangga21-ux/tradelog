@@ -10,7 +10,7 @@
 #property strict
 
 //--- Inputs
-input string InpApiUrl      = "http://localhost:3000/api/mt5/ingest"; // Tradelog Ingest URL
+input string InpApiUrl      = "https://tradelogjournal-app.vercel.app/api/mt5/ingest"; // Tradelog Ingest URL
 input string InpApiSecret   = "tradelog-mt5-secret-key";             // API Secret Key
 input bool   InpSyncHistory = true;                                  // Sync past trades on start?
 input int    InpHistoryDays = 30;                                    // History lookback (days)
