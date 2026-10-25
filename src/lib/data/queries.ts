@@ -45,17 +45,21 @@ export async function loadJournals(): Promise<Journal[]> {
     const { supabase } = await import("@/lib/supabase");
     const email = await getActiveUserEmail();
     
+    console.log("[loadJournals] fetching for email:", email);
     const { data, error } = await supabase
       .from("journals")
       .select("*")
       .eq("user_email", email)
       .order("journal_date", { ascending: false });
     
-    if (!error && data) {
+    if (error) {
+      console.error("[loadJournals] supabase error:", error);
+    } else if (data) {
+      console.log("[loadJournals] supabase returned rows:", data.length);
       return data as Journal[];
     }
-  } catch {
-    // Fallback to local
+  } catch (err) {
+    console.error("[loadJournals] catch error:", err);
   }
   
   const ds = await loadCurrentDataset();
