@@ -119,6 +119,27 @@ export function DataProvider({
     refresh();
   }, [refresh]);
 
+  const addOrUpdateAccount = React.useCallback((account: Account) => {
+    setAccounts((prev) => {
+      const filtered = prev.filter((a) => a.id !== account.id);
+      const next = [account, ...filtered];
+      try {
+        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const deleteAccountFromState = React.useCallback((id: string) => {
+    setAccounts((prev) => {
+      const next = prev.filter((a) => a.id !== id);
+      try {
+        localStorage.setItem("tradelog_accounts", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   const logout = React.useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
