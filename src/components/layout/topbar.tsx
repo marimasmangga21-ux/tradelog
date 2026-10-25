@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, Plus, RefreshCw, Smartphone, Zap } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { MobileMenuList } from "@/components/layout/sidebar";
@@ -13,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 export function Topbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { syncMt5, syncingMt5, profile, logout } = useData();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
@@ -48,7 +48,11 @@ export function Topbar() {
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-[#1a1a1a] bg-black/90 px-3 backdrop-blur-md sm:px-6">
       {/* Mobile Topbar View: Logo TRADELOG + Profil Pill + Logout + Drawer */}
       <div className="flex w-full items-center justify-between lg:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard")}
+          className="flex items-center gap-2 text-left"
+        >
           <img
             src="/logo-icon.png"
             alt="TRADELOG"
@@ -57,11 +61,12 @@ export function Topbar() {
           <span className="font-mono text-base font-extrabold tracking-wider text-[#b2ff05]">
             TRADELOG
           </span>
-        </Link>
+        </button>
 
         <div className="flex items-center gap-1.5">
-          <Link
-            href="/settings"
+          <button
+            type="button"
+            onClick={() => router.push("/settings")}
             className="flex items-center gap-1.5 rounded-full bg-[#121215] p-1 pr-2.5 border border-[#222228] hover:border-[#b2ff05]/40 transition-colors"
           >
             <img
@@ -72,7 +77,7 @@ export function Topbar() {
             <span className="text-[11px] font-semibold text-white max-w-[80px] truncate">
               {profile?.name || "Evan Mita"}
             </span>
-          </Link>
+          </button>
 
           <button
             type="button"
@@ -132,8 +137,9 @@ export function Topbar() {
         <h1 className="font-semibold tracking-tight text-[#f2f2f0] text-sm sm:text-base">{title}</h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Link
-            href="/preview"
+          <button
+            type="button"
+            onClick={() => router.push("/preview")}
             className={cn(
               "hidden md:flex h-8 items-center gap-1.5 rounded-md border border-[#1a1a1a] bg-[#121214] px-2.5 text-xs font-medium text-[#a0a0a0] transition-colors hover:border-[#b2ff05]/40 hover:bg-[#b2ff05]/10 hover:text-[#b2ff05]",
               pathname === "/preview" && "border-[#b2ff05]/50 bg-[#b2ff05]/15 text-[#b2ff05]"
@@ -142,7 +148,7 @@ export function Topbar() {
           >
             <Smartphone className="h-3.5 w-3.5" />
             <span>iPhone 17 Pro</span>
-          </Link>
+          </button>
 
           <Button
             type="button"
@@ -160,17 +166,19 @@ export function Topbar() {
             </span>
           </Button>
 
-          <Link
-            href="/trades/new"
+          <button
+            type="button"
+            onClick={() => router.push("/trades/new")}
             className="hidden sm:inline-flex items-center gap-1.5 rounded-md bg-[#b2ff05] px-3 py-1.5 text-xs font-semibold text-black transition-colors hover:bg-[#8fcc04]"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             <span>Log Trade</span>
-          </Link>
+          </button>
 
           {/* User profile pill */}
-          <Link
-            href="/settings"
+          <button
+            type="button"
+            onClick={() => router.push("/settings")}
             className="flex h-8 items-center gap-2 rounded-full border border-[#222228] bg-[#121215] p-1 pr-3 transition-colors hover:border-[#b2ff05]/40"
             title={profile?.email ? `Login sebagai ${profile.name} (${profile.email})` : "Pengaturan Akun"}
           >
@@ -188,7 +196,7 @@ export function Topbar() {
             <span className="text-xs font-semibold text-white max-w-[100px] truncate">
               {profile?.name || "Evan Mita"}
             </span>
-          </Link>
+          </button>
 
           {/* Direct Logout Button */}
           <Button

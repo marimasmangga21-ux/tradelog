@@ -1,8 +1,7 @@
 ﻿"use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart2,
   BookOpen,
@@ -61,6 +60,7 @@ export const BOTTOM_ITEMS: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { collapsed, toggle } = useSidebar();
   const { accounts, profile, logout } = useData();
 
@@ -140,8 +140,9 @@ export function Sidebar() {
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
+                  <button
+                    type="button"
+                    onClick={() => router.push(item.href)}
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-md transition-colors",
                       active
@@ -150,7 +151,7 @@ export function Sidebar() {
                     )}
                   >
                     <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </Link>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{item.label}</TooltipContent>
               </Tooltip>
@@ -158,11 +159,12 @@ export function Sidebar() {
           }
 
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              type="button"
+              onClick={() => router.push(item.href)}
               className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
                 active
                   ? "bg-[#121214] text-[#b2ff05]"
                   : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
@@ -176,7 +178,7 @@ export function Sidebar() {
                 strokeWidth={1.5}
               />
               <span className="truncate">{item.label}</span>
-            </Link>
+            </button>
           );
         })}
 
@@ -190,8 +192,9 @@ export function Sidebar() {
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
+                  <button
+                    type="button"
+                    onClick={() => router.push(item.href)}
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-md transition-colors",
                       active
@@ -200,7 +203,7 @@ export function Sidebar() {
                     )}
                   >
                     <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </Link>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{item.label}</TooltipContent>
               </Tooltip>
@@ -208,11 +211,12 @@ export function Sidebar() {
           }
 
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              type="button"
+              onClick={() => router.push(item.href)}
               className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
                 active
                   ? "bg-[#121214] text-[#b2ff05]"
                   : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
@@ -226,7 +230,7 @@ export function Sidebar() {
                 strokeWidth={1.5}
               />
               <span className="truncate">{item.label}</span>
-            </Link>
+            </button>
           );
         })}
       </nav>
@@ -280,11 +284,12 @@ export function Sidebar() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[#222228]" />
 
-            <DropdownMenuItem asChild>
-              <Link href="/settings" className="cursor-pointer gap-2 text-xs">
-                <Settings className="h-3.5 w-3.5 text-[#a1a1aa]" />
-                <span>Pengaturan Akun</span>
-              </Link>
+            <DropdownMenuItem
+              onClick={() => router.push("/settings")}
+              className="cursor-pointer gap-2 text-xs"
+            >
+              <Settings className="h-3.5 w-3.5 text-[#a1a1aa]" />
+              <span>Pengaturan Akun</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem
@@ -335,6 +340,7 @@ export function Sidebar() {
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Jangan render bottom nav luar jika sedang berada di halaman studio /preview
   if (pathname === "/preview") return null;
@@ -359,23 +365,25 @@ export function MobileNav() {
 
           if (isAction) {
             return (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
+                type="button"
+                onClick={() => router.push(item.href)}
                 className="group relative -top-3 flex flex-col items-center"
                 aria-label="Add Trade / Strategy"
               >
                 <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[#b2ff05] text-black shadow-[0_0_24px_rgba(178,255,5,0.6)] ring-4 ring-[#09090b] transition-all duration-200 group-hover:scale-105 group-active:scale-95">
                   <Plus className="h-6 w-6 stroke-[3] transition-transform duration-200 group-hover:rotate-90" />
                 </div>
-              </Link>
+              </button>
             );
           }
 
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              type="button"
+              onClick={() => router.push(item.href)}
               className={cn(
                 "group flex flex-1 flex-col items-center py-1 transition-all duration-200 active:scale-95",
                 active ? "text-[#b2ff05]" : "text-[#71717a] hover:text-[#e4e4e7]"
@@ -399,7 +407,7 @@ export function MobileNav() {
               >
                 {item.label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>
@@ -409,6 +417,7 @@ export function MobileNav() {
 
 export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { logout } = useData();
   // Hilangkan Mobile Studio dari menu di HP, tambahkan Settings
   const mobileNavItems = [
@@ -422,12 +431,15 @@ export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
         const active = pathname === item.href;
         const Icon = item.icon;
         return (
-          <Link
+          <button
             key={item.href}
-            href={item.href}
-            onClick={onSelect}
+            type="button"
+            onClick={() => {
+              onSelect?.();
+              router.push(item.href);
+            }}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors text-left",
               active
                 ? "bg-[#b2ff05]/15 text-[#b2ff05] font-semibold"
                 : "text-[#a0a0a0] hover:bg-white/[0.04] hover:text-white",
@@ -435,7 +447,7 @@ export function MobileMenuList({ onSelect }: { onSelect?: () => void }) {
           >
             <Icon className="h-4 w-4" />
             <span>{item.label}</span>
-          </Link>
+          </button>
         );
       })}
 
