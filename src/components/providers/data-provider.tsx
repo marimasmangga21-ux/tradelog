@@ -47,7 +47,7 @@ export function DataProvider({
   const [loading, setLoading] = React.useState(false);
   const [syncingMt5, setSyncingMt5] = React.useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount & auto-refresh from server
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem("tradelog_accounts");
@@ -64,7 +64,10 @@ export function DataProvider({
         }
       }
     } catch {}
-  }, []);
+
+    // Selalu sinkronkan data terbaru dari server saat buka halaman
+    refresh();
+  }, [refresh]);
 
   React.useEffect(() => {
     if (initialProfile) setProfile(initialProfile);
