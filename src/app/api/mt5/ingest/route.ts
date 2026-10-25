@@ -269,6 +269,35 @@ export async function POST(req: Request) {
       }
     });
 
+    // Simpan permanen ke Supabase agar tidak hilang saat serverless Vercel restart
+    try {
+      const { supabase } = await import("@/lib/supabase");
+      const { getActiveUserEmail } = await import("@/lib/store/db");
+      const email = await getActiveUserEmail();
+      const freshDb = await readDb();
+      const freshAccount = freshDb.accounts.find((a: any) => a.id === targetAccountId);
+      if (freshAccount) {
+        await supabase.from("accounts").upsert({
+          ...freshAccount,
+          user_email: email,
+        }, { onConflict: "id" });
+      }
+
+      const freshTrades = freshDb.trades.filter((t: any) => t.account_id === targetAccountId);
+      if (freshTrades.length > 0) {
+        // Upsert trades dalam batch 50
+        for (let i = 0; i < freshTrades.length; i += 50) {
+          const chunk = freshTrades.slice(i, i + 50).map((t: any) => ({
+            ...t,
+            user_email: email,
+          }));
+          await supabase.from("trades").upsert(chunk, { onConflict: "id" });
+        }
+      }
+    } catch (sbErr) {
+      console.error("[MT5 Ingest] Supabase sync error:", sbErr);
+    }
+
     return NextResponse.json({
       ok: true,
       message: `Sync success for account #${account_number}`,
