@@ -41,6 +41,23 @@ export async function loadTrade(id: string): Promise<Trade | null> {
 }
 
 export async function loadJournals(): Promise<Journal[]> {
+  try {
+    const { supabase } = await import("@/lib/supabase");
+    const email = await getActiveUserEmail();
+    
+    const { data, error } = await supabase
+      .from("journals")
+      .select("*")
+      .eq("user_email", email)
+      .order("journal_date", { ascending: false });
+    
+    if (!error && data) {
+      return data as Journal[];
+    }
+  } catch {
+    // Fallback to local
+  }
+  
   const ds = await loadCurrentDataset();
   return [...ds.journals].sort(
     (a, b) => new Date(b.journal_date).getTime() - new Date(a.journal_date).getTime(),

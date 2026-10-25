@@ -17,31 +17,45 @@ export async function createJournal(raw: unknown): Promise<ActionResult<Journal>
     }
     const input = parsed.data;
 
-    const journal = await mutateDb((db) => {
-      const timestamp = nowIso();
-      const created: Journal = {
-        id: newId(),
-        trade_id: input.trade_id ?? null,
-        journal_date: input.journal_date,
-        title: input.title || null,
-        mood_score: input.mood_score ?? null,
-        emotion_ids: input.emotion_ids ?? [],
-        lesson_learned: input.lesson_learned || null,
-        mistakes: input.mistakes || null,
-        plan_tomorrow: input.plan_tomorrow || null,
-        content: input.content || null,
-        created_at: timestamp,
-        updated_at: timestamp,
-      };
-      db.journals.push(created);
-      return created;
-    });
+    const timestamp = nowIso();
+    const created: Journal = {
+      id: newId(),
+      trade_id: input.trade_id ?? null,
+      journal_date: input.journal_date,
+      title: input.title || null,
+      mood_score: input.mood_score ?? null,
+      emotion_ids: input.emotion_ids ?? [],
+      lesson_learned: input.lesson_learned || null,
+      mistakes: input.mistakes || null,
+      plan_tomorrow: input.plan_tomorrow || null,
+      content: input.content || null,
+      created_at: timestamp,
+      updated_at: timestamp,
+    };
+
+    // Save to Supabase
+    try {
+      const { supabase } = await import("@/lib/supabase");
+      const { getActiveUserEmail } = await import("@/lib/store/db");
+      const email = await getActiveUserEmail();
+      
+      const { error } = await supabase
+        .from("journals")
+        .insert({ ...created, user_email: email });
+      
+      if (error) throw error;
+    } catch {
+      // Fallback to local
+      await mutateDb((db) => {
+        db.journals.push(created);
+      });
+    }
 
     revalidatePath("/journal");
     revalidatePath("/calendar");
     revalidatePath("/");
-    if (journal.trade_id) revalidatePath(`/trades/${journal.trade_id}`);
-    return { ok: true, data: journal };
+    if (created.trade_id) revalidatePath(`/trades/${created.trade_id}`);
+    return { ok: true, data: created };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menyimpan jurnal" };
   }
