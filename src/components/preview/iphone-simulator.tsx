@@ -166,7 +166,7 @@ export function IPhoneSimulator() {
   const screenWidth = isLandscape ? (isFullHeight ? 820 : 932) : 430;
 
   return (
-    <div className="relative flex flex-col h-full w-full overflow-hidden bg-[#070708] select-none">
+    <div className="keep-dark relative flex flex-col h-full w-full overflow-hidden bg-[#070708] select-none">
       {/* Top Studio Control Bar */}
       <div className="z-20 flex flex-wrap items-center justify-between gap-2.5 border-b border-[#1a1a1a] bg-[#0c0c0e]/95 px-4 py-2 backdrop-blur-md">
         <div className="flex items-center gap-3">

@@ -15,7 +15,7 @@ export function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { syncMt5, syncingMt5, profile, logout } = useData();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
@@ -74,22 +74,12 @@ export function Topbar() {
           {mounted && (
             <button
               type="button"
-              onClick={() => {
-              const nextTheme = theme === "light" ? "dark" : "light";
-              setTheme(nextTheme);
-              if (nextTheme === "light") {
-                document.documentElement.classList.remove("dark");
-                document.documentElement.classList.add("light");
-              } else {
-                document.documentElement.classList.remove("light");
-                document.documentElement.classList.add("dark");
-              }
-            }}
+              onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
               className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
-              title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
+              title={resolvedTheme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
               aria-label="Toggle theme"
             >
-              {theme === "light" ? <Moon className="h-3.5 w-3.5 text-zinc-700" /> : <Sun className="h-3.5 w-3.5 text-[#b2ff05]" />}
+              {resolvedTheme === "light" ? <Moon className="h-3.5 w-3.5 text-zinc-700" /> : <Sun className="h-3.5 w-3.5 text-[#b2ff05]" />}
             </button>
           )}
 
@@ -208,22 +198,12 @@ export function Topbar() {
           {mounted && (
             <button
               type="button"
-              onClick={() => {
-              const nextTheme = theme === "light" ? "dark" : "light";
-              setTheme(nextTheme);
-              if (nextTheme === "light") {
-                document.documentElement.classList.remove("dark");
-                document.documentElement.classList.add("light");
-              } else {
-                document.documentElement.classList.remove("light");
-                document.documentElement.classList.add("dark");
-              }
-            }}
+              onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
               className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-              title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
+              title={resolvedTheme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
               aria-label="Toggle theme"
             >
-              {theme === "light" ? <Moon className="h-4 w-4 text-zinc-700" /> : <Sun className="h-4 w-4 text-[#b2ff05]" />}
+              {resolvedTheme === "light" ? <Moon className="h-4 w-4 text-zinc-700" /> : <Sun className="h-4 w-4 text-[#b2ff05]" />}
             </button>
           )}
 

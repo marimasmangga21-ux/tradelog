@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/components/providers/i18n-provider";
@@ -33,21 +33,28 @@ export function AppProviders({
       <I18nProvider initialLocale={locale}>
         <TooltipProvider delayDuration={200}>
           {children}
-          <Toaster
-            position={isMobile ? "top-center" : "bottom-right"}
-            theme="dark"
-            richColors
-            closeButton
-            toastOptions={{
-              classNames: {
-                toast:
-                  "border border-border/80 bg-card text-card-foreground shadow-card rounded-xl text-sm",
-                description: "text-muted-foreground",
-              },
-            }}
-          />
+          <ThemedToaster isMobile={isMobile} />
         </TooltipProvider>
       </I18nProvider>
     </NextThemesProvider>
+  );
+}
+
+function ThemedToaster({ isMobile }: { isMobile: boolean }) {
+  const { resolvedTheme } = useTheme();
+  return (
+    <Toaster
+      position={isMobile ? "top-center" : "bottom-right"}
+      theme={resolvedTheme === "light" ? "light" : "dark"}
+      richColors
+      closeButton
+      toastOptions={{
+        classNames: {
+          toast:
+            "border border-border/80 bg-card text-card-foreground shadow-card rounded-xl text-sm",
+          description: "text-muted-foreground",
+        },
+      }}
+    />
   );
 }

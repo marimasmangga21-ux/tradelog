@@ -553,3 +553,138 @@
     color: #5c5c5c;
   }
 }
+
+/* =========================================================
+   LIGHT MODE OVERRIDES
+   Komponen banyak memakai warna gelap hardcoded (bg-[#0c0c0e], text-white, dll).
+   Saat html.light aktif, warna-warna tersebut dipetakan ke palet terang.
+   Area .snapshot-surface (export gambar) & .keep-dark tetap gelap.
+   ========================================================= */
+
+/* Surface utama (card / panel) */
+html.light :is(
+  [class*="bg-[#0c0c0e]"], [class*="bg-[#090909]"], [class*="bg-[#09090b]"],
+  [class*="bg-[#0a0a0a]"], [class*="bg-[#0c0c0c]"], [class*="bg-[#0d0d0f]"],
+  [class*="bg-[#0e0e12]"], [class*="bg-[#080808]"], [class*="bg-[#050507]"],
+  [class*="bg-[#0b0b0c]"], [class*="bg-[#000000]"], [class*="bg-[#111]"],
+  [class*="bg-[#101412]"], [class*="bg-[#121213]"], [class*="bg-[#070708]"]
+):not(:is(.snapshot-surface, .keep-dark, .snapshot-surface *, .keep-dark *)) {
+  background-color: #ffffff !important;
+}
+
+/* Surface sekunder (input, chip, tombol, tab) */
+html.light :is(
+  [class*="bg-[#121214]"], [class*="bg-[#121215]"], [class*="bg-[#141418]"],
+  [class*="bg-[#141414]"], [class*="bg-[#181818]"], [class*="bg-[#18181b]"],
+  [class*="bg-[#18181c]"], [class*="bg-[#1a1a1a]"], [class*="bg-[#1c1c22]"],
+  [class*="bg-[#1c1c1c]"], [class*="bg-[#16161a]"], [class*="bg-[#1a1a20]"],
+  [class*="bg-[#222228]"], [class*="bg-[#202026]"], [class*="bg-[#22222a]"],
+  [class*="bg-[#242424]"], [class*="bg-[#25252a]"], [class*="bg-[#252528]"],
+  [class*="bg-[#27272a]"]
+):not(:is(.snapshot-surface, .keep-dark, .snapshot-surface *, .keep-dark *)) {
+  background-color: #f4f4f5 !important;
+}
+
+/* Overlay putih transparan di atas card gelap */
+html.light :is([class*="bg-white/[0.0"], [class*="bg-white/5"], [class*="bg-white/10"]):not(:is(.snapshot-surface *, .keep-dark *)) {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Chip / tooltip hitam transparan (bukan overlay fullscreen / hover image) */
+html.light [class*="bg-black/"]:not(.fixed):not(.opacity-0):not(.inset-0):not(:is(.snapshot-surface *, .keep-dark *)) {
+  background-color: #f4f4f5 !important;
+}
+
+/* Border gelap */
+html.light :is(
+  [class*="border-[#222228]"], [class*="border-[#1a1a1a]"], [class*="border-[#1e1e24]"],
+  [class*="border-[#27272a]"], [class*="border-[#262626]"], [class*="border-[#1f1f22]"],
+  [class*="border-[#1c1c1f]"], [class*="border-[#1e1e1e]"], [class*="border-[#222]"],
+  [class*="border-[#2a2a2a]"], [class*="border-[#282830]"], [class*="border-[#2a2a2e]"],
+  [class*="border-[#3a3a3a]"], [class*="border-[#161616]"], [class*="border-[#141414]"],
+  [class*="border-[#181818]"], [class*="border-[#2e2e2e]"], [class*="border-[#2c2c34]"],
+  [class*="border-[#2a2a34]"], [class*="border-[#282832]"], [class*="border-[#1e1e20]"],
+  [class*="border-[#292929]"], [class*="border-white/"]
+):not(:is(.snapshot-surface, .keep-dark, .snapshot-surface *, .keep-dark *)) {
+  border-color: #e4e4e7 !important;
+}
+
+html.light :is([class*="divide-[#"], [class*="divide-white"]) > * + *:not(:is(.snapshot-surface *, .keep-dark *)) {
+  border-color: #e4e4e7 !important;
+}
+
+/* Teks utama terang -> gelap */
+html.light :is(
+  [class*="text-white"]:not([class*="text-white/"]),
+  [class*="text-[#f2f2f0]"], [class*="text-[#f4f4f5]"], [class*="text-[#eee]"],
+  [class*="text-[#e4e4e7]"], [class*="text-[#d4d4d8]"],
+  [class*="text-zinc-100"], [class*="text-zinc-200"],
+  [class*="text-white/90"], [class*="text-white/85"], [class*="text-white/80"]
+):not(:is(
+  [class*="bg-red-"], [class*="bg-emerald-"], [class*="bg-green-"], [class*="bg-blue-"],
+  [class*="bg-loss"], [class*="bg-profit"], [class*="bg-destructive"], .fixed,
+  .snapshot-surface, .keep-dark, .snapshot-surface *, .keep-dark *, .fixed[class*="bg-black/"] *
+)) {
+  color: #18181b !important;
+}
+
+/* Teks sekunder */
+html.light :is(
+  [class*="text-[#a0a0a0]"], [class*="text-[#a1a1aa]"], [class*="text-[#8e8e93]"],
+  [class*="text-[#8c8c8c]"], [class*="text-[#b0b0b0]"], [class*="text-[#c4c4c4]"],
+  [class*="text-[#c0c0c0]"], [class*="text-zinc-300"], [class*="text-zinc-400"],
+  [class*="text-white/70"], [class*="text-white/60"], [class*="text-white/50"]
+):not(:is(.snapshot-surface *, .keep-dark *, .fixed[class*="bg-black/"] *)) {
+  color: #52525b !important;
+}
+
+html.light :is([class*="text-white/40"], [class*="text-white/35"], [class*="text-white/30"], [class*="text-white/25"]):not(:is(.snapshot-surface *, .keep-dark *)) {
+  color: #a1a1aa !important;
+}
+
+/* Aksen lime neon tidak terbaca di putih -> lime gelap */
+html.light [class*="text-[#b2ff05]"]:not(:is(.snapshot-surface *, .keep-dark *, [class*="bg-black/"], [class*="bg-black/"] *)) {
+  color: #4d7c0f !important;
+}
+
+/* Utility class kustom */
+html.light .tradoxes-card {
+  background: #ffffff;
+  border-color: #e4e4e7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px -4px rgba(0, 0, 0, 0.06);
+}
+html.light .tradoxes-card-hover:hover {
+  border-color: rgba(101, 163, 13, 0.45);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.12);
+}
+html.light .glass-dock {
+  background: rgba(255, 255, 255, 0.92);
+  border-top-color: #e4e4e7;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+}
+html.light .mobile-card {
+  background: #ffffff;
+  border-color: #e4e4e7;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+html.light input,
+html.light textarea,
+html.light select {
+  color: #18181b !important;
+  -webkit-text-fill-color: #18181b !important;
+}
+
+html.light ::selection {
+  background-color: rgba(132, 204, 22, 0.3);
+  color: #18181b;
+}
+
+@import "./light-theme.css";

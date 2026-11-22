@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "theme:light": "node scripts/gen-light-theme.mjs",
     "smoke": "node scripts/smoke.js",
     "smoke:mobile": "node scripts/smoke-mobile.js",
     "reset:data": "node scripts/reset-data.js"
