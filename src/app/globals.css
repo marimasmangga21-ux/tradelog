@@ -710,3 +710,36 @@ html.light .tradoxes-card,
 html.light .mobile-card {
   background-color: #ffffff !important;
 }
+
+/* Sidebar is black in dark mode and gray in light mode, including its fixed footer. */
+.app-sidebar {
+  background-color: #000000;
+  border-color: #1a1a1a;
+}
+html.light .app-sidebar {
+  background-color: #d1d5db !important;
+  border-color: #c4c9d1 !important;
+}
+html.light .app-sidebar > div:first-child,
+html.light .app-sidebar > div:last-child {
+  background-color: #d1d5db;
+}
+html.light .app-sidebar .border-t,
+html.light .app-sidebar .border-b {
+  border-color: #c4c9d1 !important;
+}
+html.light .app-sidebar [class*="bg-[#090909]"],
+html.light .app-sidebar [class*="bg-[#1c1c1c]"] {
+  background-color: #e5e7eb !important;
+  border-color: #c4c9d1 !important;
+}
+html.light .app-sidebar [class*="text-[#f2f2f0]"],
+html.light .app-sidebar [class*="text-[#a0a0a0]"],
+html.light .app-sidebar [class*="text-[#71717a]"],
+html.light .app-sidebar [class*="text-[#5c5c5c]"] {
+  color: #27272a !important;
+}
+html.light .app-sidebar [class*="hover:bg-[#121214]"]:hover,
+html.light .app-sidebar [class*="hover:bg-[#121214]/60"]:hover {
+  background-color: #e5e7eb !important;
+}
