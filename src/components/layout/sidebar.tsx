@@ -86,7 +86,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="flex items-center min-w-0">
             <img
-              src="/logo-text.png"
+              src="/logo-text-transparent.png"
               alt="TRADELOG"
               className="h-[15px] w-auto max-w-[130px] object-contain"
             />
