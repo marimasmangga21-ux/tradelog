@@ -52,7 +52,7 @@ export function Topbar() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-[#1a1a1a] bg-black/90 px-3 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background/90 px-3 backdrop-blur-md sm:px-6 transition-colors">
       {/* Mobile Topbar View: Logo TRADELOG + Profil Pill + Logout + Drawer */}
       <div className="flex w-full items-center justify-between lg:hidden">
         <button
@@ -74,7 +74,17 @@ export function Topbar() {
           {mounted && (
             <button
               type="button"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              onClick={() => {
+              const nextTheme = theme === "light" ? "dark" : "light";
+              setTheme(nextTheme);
+              if (nextTheme === "light") {
+                document.documentElement.classList.remove("dark");
+                document.documentElement.classList.add("light");
+              } else {
+                document.documentElement.classList.remove("light");
+                document.documentElement.classList.add("dark");
+              }
+            }}
               className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
               title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
               aria-label="Toggle theme"
@@ -153,7 +163,7 @@ export function Topbar() {
 
       {/* Desktop Topbar View (Expanded Layout) */}
       <div className="mx-auto hidden h-full w-full max-w-[1280px] items-center justify-between lg:flex">
-        <h1 className="font-semibold tracking-tight text-[#f2f2f0] text-sm sm:text-base">{title}</h1>
+        <h1 className="font-semibold tracking-tight text-foreground text-sm sm:text-base">{title}</h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <button
@@ -198,7 +208,17 @@ export function Topbar() {
           {mounted && (
             <button
               type="button"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              onClick={() => {
+              const nextTheme = theme === "light" ? "dark" : "light";
+              setTheme(nextTheme);
+              if (nextTheme === "light") {
+                document.documentElement.classList.remove("dark");
+                document.documentElement.classList.add("light");
+              } else {
+                document.documentElement.classList.remove("light");
+                document.documentElement.classList.add("dark");
+              }
+            }}
               className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
               title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
               aria-label="Toggle theme"

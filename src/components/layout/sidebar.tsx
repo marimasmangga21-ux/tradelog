@@ -72,7 +72,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-[#1a1a1a] bg-black transition-[width] duration-200 ease-out lg:flex",
+        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-border bg-card transition-[width] duration-200 ease-out lg:flex",
         collapsed ? "w-[72px]" : "w-[240px]",
       )}
     >

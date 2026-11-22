@@ -62,8 +62,8 @@ export default async function RootLayout({
   const locale = await resolveLocale();
 
   return (
-    <html lang={locale} className="dark" suppressHydrationWarning>
-      <body className={cn(manrope.variable, mono.variable, "font-sans bg-black text-[#f2f2f0]")}>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={cn(manrope.variable, mono.variable, "font-sans bg-background text-foreground transition-colors duration-200")}>
         <AppProviders locale={locale}>{children}</AppProviders>
       </body>
     </html>
