@@ -1,35 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./light-theme.css";
 
 @layer base {
   :root {
-    /* Tradoxes exact design tokens */
-    --bg-primary: #000000;
-    --bg-elevated: #090909;
-    --bg-elevated-2: #121214;
-    --bg-overlay: rgba(0, 0, 0, 0.85);
+    /* Semantic tokens: light palette by default. */
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-raised: #f8fafc;
+    --ui-border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --brand-accent: #4d7c0f;
+    --accent-strong: #65a30d;
+    --accent-action: #a3e635;
+    --profit: #166534;
+    --loss: #b91c1c;
+    --flat: #92400e;
+    --info: #1d4ed8;
 
-    --border-subtle: #1a1a1a;
-    --border-strong: #292929;
-    --border-glow: rgba(178, 255, 5, 0.35);
-
-    --text-primary: #f2f2f0;
-    --text-secondary: #a0a0a0;
-    --text-tertiary: #5c5c5c;
-
-    --accent-primary: #b2ff05;
-    --accent-dim: #8fcc04;
-    --accent-glow: rgba(178, 255, 5, 0.25);
-    --accent-surface: rgba(178, 255, 5, 0.08);
-
-    --success: #b2ff05;
-    --danger: #ff4d4d;
-    --danger-surface: rgba(255, 77, 77, 0.08);
-    --warning: #ffb020;
-    --warning-surface: rgba(255, 176, 32, 0.08);
-    --info: #4da3ff;
+    --bg-primary: var(--bg);
+    --bg-elevated: var(--surface);
+    --bg-elevated-2: var(--surface-raised);
+    --bg-overlay: rgba(15, 23, 42, 0.55);
+    --border: var(--ui-border);
+    --border-subtle: var(--ui-border);
+    --border-strong: #cbd5e1;
+    --border-glow: rgba(101, 163, 13, 0.25);
+    --text-primary: var(--text);
+    --text-secondary: var(--text-muted);
+    --text-tertiary: #64748b;
+    --accent-primary: var(--brand-accent);
+    --accent-dim: #4d7c0f;
+    --accent-glow: rgba(101, 163, 13, 0.16);
+    --accent-surface: #ecfccb;
+    --success: var(--profit);
+    --danger: var(--loss);
+    --danger-surface: #fee2e2;
+    --warning: var(--flat);
+    --warning-surface: #fef3c7;
 
     --session-asia: #6dd5de;
     --session-asia-surface: rgba(109, 213, 222, 0.1);
@@ -39,37 +48,53 @@
     --session-new-york-surface: rgba(238, 141, 174, 0.1);
 
     /* Shadcn bridge (Light theme default when .light or html:not(.dark)) */
-    --background: #f8fafc;
-    --foreground: #09090b;
-    --card: #ffffff;
-    --card-foreground: #09090b;
-    --card-elevated: #f1f5f9;
-    --popover: #ffffff;
-    --popover-foreground: #09090b;
+    --background: var(--bg);
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --card-elevated: var(--surface-raised);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
 
-    --primary: #84cc16;
-    --primary-foreground: #ffffff;
-    --secondary: #f1f5f9;
-    --secondary-foreground: #09090b;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --accent: #f1f5f9;
-    --accent-foreground: #09090b;
+    --primary: var(--accent-action);
+    --primary-foreground: #1a2e05;
+    --secondary: var(--surface-raised);
+    --secondary-foreground: var(--text);
+    --muted: var(--surface-raised);
+    --muted-foreground: var(--text-muted);
+    --accent: #ecfccb;
+    --accent-foreground: #365314;
     --destructive: var(--danger);
     --destructive-foreground: #ffffff;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: rgba(132, 204, 22, 0.4);
+    --border: var(--ui-border);
+    --input: #cbd5e1;
+    --ring: rgba(77, 124, 15, 0.35);
 
-    --profit: #16a34a;
     --profit-foreground: #ffffff;
-    --loss: var(--danger);
     --loss-foreground: #ffffff;
 
     --radius: 0.5rem; /* 8px in Tradoxes */
   }
 
   .dark {
+    --bg: #000000;
+    --surface: #090909;
+    --surface-raised: #121214;
+    --ui-border: #222228;
+    --border: #222228;
+    --text: #f2f2f0;
+    --text-muted: #a0a0a0;
+    --brand-accent: #b2ff05;
+    --accent: #b2ff05;
+    --accent-strong: #b2ff05;
+    --accent-action: #b2ff05;
+    --profit: #b2ff05;
+    --loss: #ff4d4d;
+    --flat: #ffb020;
+    --success: #b2ff05;
+    --danger: #ff4d4d;
+    --warning: #ffb020;
+
     --bg-primary: #000000;
     --bg-elevated: #090909;
     --bg-elevated-2: #121214;
@@ -96,12 +121,31 @@
     --accent-foreground: var(--text-primary);
     --destructive: var(--danger);
     --destructive-foreground: #ffffff;
-    --border: #222228;
+    --border: var(--ui-border);
     --input: #222228;
     --ring: rgba(178, 255, 5, 0.4);
     --profit: var(--accent-primary);
     --loss: var(--danger);
   }
+}
+
+html:not(.dark),
+html.light {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) body,
+html.light body {
+  background-color: var(--bg) !important;
+  color: var(--text);
+}
+
+html.dark body {
+  background-color: #000000;
+  color: #f2f2f0;
 }
 
 @layer base {
@@ -556,10 +600,9 @@
 }
 
 /* =========================================================
-   LIGHT MODE OVERRIDES
-   Komponen banyak memakai warna gelap hardcoded (bg-[#0c0c0e], text-white, dll).
-   Saat html.light aktif, warna-warna tersebut dipetakan ke palet terang.
-   Area .snapshot-surface (export gambar) & .keep-dark tetap gelap.
+   LEGACY LIGHT MODE OVERRIDES
+   Retained for existing hardcoded utility classes while pages migrate to tokens.
+   New components should use semantic CSS variables.
    ========================================================= */
 
 /* Surface utama (card / panel) */
@@ -743,3 +786,23 @@ html.light .app-sidebar [class*="hover:bg-[#121214]"]:hover,
 html.light .app-sidebar [class*="hover:bg-[#121214]/60"]:hover {
   background-color: #e5e7eb !important;
 }
+html.light .app-sidebar .nav-item-active {
+  background-color: #ecfccb !important;
+  color: #365314 !important;
+}
+html.light .app-sidebar .nav-item-active svg {
+  color: #365314 !important;
+}
+
+html.light .app-sidebar > div:first-child img[alt="TRADELOG"] {
+  filter: saturate(0.85) brightness(0.72);
+}
+
+html.light .app-sidebar [class*="bg-[#121214]"] {
+  background-color: #d1d5db;
+}
+html.light .app-sidebar [class*="border-[#1a1a1a]"] {
+  border-color: #c4c9d1 !important;
+}
+
+@import "./light-theme.css";

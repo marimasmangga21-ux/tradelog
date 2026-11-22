@@ -146,7 +146,7 @@ export function Sidebar() {
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-md transition-colors",
                       active
-                        ? "bg-[#121214] text-[#b2ff05]"
+                        ? "nav-item-active bg-[#121214] text-[#b2ff05]"
                         : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
                     )}
                   >
@@ -166,7 +166,7 @@ export function Sidebar() {
               className={cn(
                 "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
                 active
-                  ? "bg-[#121214] text-[#b2ff05]"
+                  ? "nav-item-active bg-[#121214] text-[#b2ff05]"
                   : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
               )}
             >
@@ -198,7 +198,7 @@ export function Sidebar() {
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-md transition-colors",
                       active
-                        ? "bg-[#121214] text-[#b2ff05]"
+                        ? "nav-item-active bg-[#121214] text-[#b2ff05]"
                         : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
                     )}
                   >
@@ -218,7 +218,7 @@ export function Sidebar() {
               className={cn(
                 "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
                 active
-                  ? "bg-[#121214] text-[#b2ff05]"
+                  ? "nav-item-active bg-[#121214] text-[#b2ff05]"
                   : "text-[#a0a0a0] hover:bg-[#121214]/60 hover:text-[#f2f2f0]",
               )}
             >

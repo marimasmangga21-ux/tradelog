@@ -77,7 +77,8 @@ export function Topbar() {
               onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
               className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
               title={resolvedTheme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
-              aria-label="Toggle theme"
+              aria-label={resolvedTheme === "light" ? "Aktifkan mode gelap" : "Aktifkan mode terang"}
+              aria-pressed={resolvedTheme === "dark"}
             >
               {resolvedTheme === "light" ? <Moon className="h-3.5 w-3.5 text-zinc-700" /> : <Sun className="h-3.5 w-3.5 text-[#b2ff05]" />}
             </button>
@@ -201,7 +202,8 @@ export function Topbar() {
               onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
               className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
               title={resolvedTheme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
-              aria-label="Toggle theme"
+              aria-label={resolvedTheme === "light" ? "Aktifkan mode gelap" : "Aktifkan mode terang"}
+              aria-pressed={resolvedTheme === "dark"}
             >
               {resolvedTheme === "light" ? <Moon className="h-4 w-4 text-zinc-700" /> : <Sun className="h-4 w-4 text-[#b2ff05]" />}
             </button>

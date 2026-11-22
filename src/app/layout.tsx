@@ -63,6 +63,13 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(()=>{try{const t=localStorage.getItem('tradelog-theme');const v=t==='light'||t==='dark'?t:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.classList.toggle('dark',v==='dark');document.documentElement.classList.toggle('light',v==='light');document.documentElement.dataset.theme=v}catch{document.documentElement.classList.add('dark')}})()`,
+          }}
+        />
+      </head>
       <body className={cn(manrope.variable, mono.variable, "font-sans bg-background text-foreground transition-colors duration-200")}>
         <AppProviders locale={locale}>{children}</AppProviders>
       </body>
