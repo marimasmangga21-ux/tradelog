@@ -37,31 +37,31 @@
     --session-new-york: #ee8dae;
     --session-new-york-surface: rgba(238, 141, 174, 0.1);
 
-    /* Shadcn bridge */
-    --background: var(--bg-primary);
-    --foreground: var(--text-primary);
-    --card: var(--bg-elevated);
-    --card-foreground: var(--text-primary);
-    --card-elevated: var(--bg-elevated-2);
-    --popover: var(--bg-elevated);
-    --popover-foreground: var(--text-primary);
+    /* Shadcn bridge (Light theme default when .light or html:not(.dark)) */
+    --background: #f8fafc;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --card-elevated: #f1f5f9;
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
 
-    --primary: var(--accent-primary);
-    --primary-foreground: #000000;
-    --secondary: var(--bg-elevated-2);
-    --secondary-foreground: var(--text-primary);
-    --muted: var(--bg-elevated-2);
-    --muted-foreground: var(--text-secondary);
-    --accent: var(--bg-elevated-2);
-    --accent-foreground: var(--text-primary);
+    --primary: #84cc16;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #09090b;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #f1f5f9;
+    --accent-foreground: #09090b;
     --destructive: var(--danger);
     --destructive-foreground: #ffffff;
-    --border: #222228;
-    --input: #222228;
-    --ring: rgba(178, 255, 5, 0.4);
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: rgba(132, 204, 22, 0.4);
 
-    --profit: var(--accent-primary);
-    --profit-foreground: #000000;
+    --profit: #16a34a;
+    --profit-foreground: #ffffff;
     --loss: var(--danger);
     --loss-foreground: #ffffff;
 
@@ -69,6 +69,15 @@
   }
 
   .dark {
+    --bg-primary: #000000;
+    --bg-elevated: #090909;
+    --bg-elevated-2: #121214;
+    --border-subtle: #1a1a1a;
+    --border-strong: #292929;
+    --text-primary: #f2f2f0;
+    --text-secondary: #a0a0a0;
+    --text-tertiary: #5c5c5c;
+
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
     --card: var(--bg-elevated);
@@ -104,19 +113,25 @@
   }
 
   body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  /* Pastikan seluruh teks di dalam kolom input/textarea/select terbaca jelas dan putih terang */
+  /* Styling form inputs */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: #f4f4f5 !important;
+    -webkit-text-fill-color: #f4f4f5 !important;
+  }
+
   input,
   textarea,
   select {
-    color: #f4f4f5 !important;
-    -webkit-text-fill-color: #f4f4f5 !important;
+    color: var(--foreground);
   }
 
   input::placeholder,

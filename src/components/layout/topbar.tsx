@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, Plus, RefreshCw, Smartphone, Zap } from "lucide-react";
+import { LogOut, Menu, Moon, Plus, RefreshCw, Smartphone, Sun, Zap } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { MobileMenuList } from "@/components/layout/sidebar";
@@ -14,7 +15,13 @@ export function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { syncMt5, syncingMt5, profile, logout } = useData();
+  const { theme, setTheme } = useTheme();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function handleSync() {
     toast.info("Syncing MT5 accounts...", { duration: 2500 });
@@ -64,17 +71,29 @@ export function Topbar() {
         </button>
 
         <div className="flex items-center gap-1.5">
+          {mounted && (
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
+              title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="h-3.5 w-3.5 text-zinc-700" /> : <Sun className="h-3.5 w-3.5 text-[#b2ff05]" />}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => router.push("/settings")}
-            className="flex items-center gap-1.5 rounded-full bg-[#121215] p-1 pr-2.5 border border-[#222228] hover:border-[#b2ff05]/40 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-card p-1 pr-2.5 border border-border hover:border-primary/40 transition-colors"
           >
             <img
               src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan"}
               alt={profile?.name || "Evan Mita"}
-              className="h-6 w-6 rounded-full bg-[#27272a] object-cover"
+              className="h-6 w-6 rounded-full bg-muted object-cover"
             />
-            <span className="text-[11px] font-semibold text-white max-w-[80px] truncate">
+            <span className="text-[11px] font-semibold text-foreground max-w-[80px] truncate">
               {profile?.name || "Evan Mita"}
             </span>
           </button>
@@ -174,6 +193,19 @@ export function Topbar() {
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             <span>Log Trade</span>
           </button>
+
+          {/* Theme switcher toggle */}
+          {mounted && (
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              title={theme === "light" ? "Ganti ke Mode Gelap" : "Ganti ke Mode Terang"}
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="h-4 w-4 text-zinc-700" /> : <Sun className="h-4 w-4 text-[#b2ff05]" />}
+            </button>
+          )}
 
           {/* User profile pill */}
           <button
