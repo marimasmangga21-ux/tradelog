@@ -687,3 +687,26 @@ html.light ::selection {
   background-color: rgba(132, 204, 22, 0.3);
   color: #18181b;
 }
+
+/* Light theme app canvas: soft gray background across the entire content area. */
+html.light,
+html.light body,
+html.light body > div,
+html.light body > div > div,
+html.light body > div > div > div,
+html.light main,
+html.light [class~="min-h-dvh"] {
+  background-color: #e5e7eb !important;
+  color: #18181b;
+}
+
+html.light header.sticky {
+  background-color: rgba(243, 244, 246, 0.96) !important;
+  border-color: #d1d5db !important;
+}
+
+/* Keep card surfaces white, with a consistent gray page canvas around them. */
+html.light .tradoxes-card,
+html.light .mobile-card {
+  background-color: #ffffff !important;
+}
